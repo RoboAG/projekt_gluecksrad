@@ -1208,13 +1208,13 @@ ULN and UDN Series&lt;p&gt;
 <part name="P+2" library="supply1" deviceset="+5V" device=""/>
 <part name="P+3" library="supply1" deviceset="+5V" device=""/>
 <part name="P+4" library="supply1" deviceset="+5V" device=""/>
-<part name="R1" library="robo_ag" deviceset="RESISTOR" device="-10MM"/>
-<part name="R2" library="robo_ag" deviceset="RESISTOR" device="-10MM"/>
-<part name="R3" library="robo_ag" deviceset="RESISTOR" device="-10MM"/>
+<part name="R1" library="robo_ag" deviceset="RESISTOR" device="-10MM" value="120"/>
+<part name="R2" library="robo_ag" deviceset="RESISTOR" device="-10MM" value="100"/>
+<part name="R3" library="robo_ag" deviceset="RESISTOR" device="-10MM" value="100"/>
 <part name="P+5" library="supply1" deviceset="+5V" device=""/>
-<part name="R4" library="robo_ag" deviceset="RESISTOR" device="-10MM"/>
-<part name="R5" library="robo_ag" deviceset="RESISTOR" device="-10MM"/>
-<part name="R6" library="robo_ag" deviceset="RESISTOR" device="-10MM"/>
+<part name="R4" library="robo_ag" deviceset="RESISTOR" device="-10MM" value="120"/>
+<part name="R5" library="robo_ag" deviceset="RESISTOR" device="-10MM" value="100"/>
+<part name="R6" library="robo_ag" deviceset="RESISTOR" device="-10MM" value="100"/>
 <part name="P+6" library="supply1" deviceset="+5V" device=""/>
 <part name="P+7" library="supply1" deviceset="+5V" device=""/>
 <part name="P+8" library="supply1" deviceset="+5V" device=""/>
