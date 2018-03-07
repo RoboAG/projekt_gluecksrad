@@ -2,19 +2,19 @@
 #include <avr/io.h>
 #include <inttypes.h>
 
-#include "lichter_demo.h"
+#include "gluecksrad.h"
 
 //**************************<Macros>*******************************************
-#define led_setRed(x)   ( x ? (PORTB|= _BV(2)) : (PORTB&= ~_BV(2)))
-#define led_setGreen(x) ( x ? (PORTB|= _BV(1)) : (PORTB&= ~_BV(1)))
-#define led_setBlue(x)  ( x ? (PORTD|= _BV(3)) : (PORTD&= ~_BV(3)))
+#define led_setRed(x)   ( x ? (PORTB|= _BV(1)) : (PORTB&= ~_BV(1)))
+#define led_setGreen(x) ( x ? (PORTB|= _BV(2)) : (PORTB&= ~_BV(2)))
+#define led_setBlue(x)  ( x ? (PORTD|= _BV(5)) : (PORTD&= ~_BV(5)))
 
 #define button_getBumper() ((PIND & _BV(4)) == 0x00)
 
-#define ST_CP(x)    ( x ? (PORTC|= _BV(1)) : (PORTC&= ~_BV(1)))
-#define SH_CP(x)    ( x ? (PORTC|= _BV(2)) : (PORTC&= ~_BV(2)))
-#define OE(x)       ( x ? (PORTC|= _BV(3)) : (PORTC&= ~_BV(3)))
-#define DS(x)       ( x ? (PORTC|= _BV(4)) : (PORTC&= ~_BV(4)))
+#define ST_CP(x)    ( x ? (PORTC|= _BV(3)) : (PORTC&= ~_BV(3)))     //Storage register clock pin;   Pin 6 (Platine)
+#define SH_CP(x)    ( x ? (PORTC|= _BV(2)) : (PORTC&= ~_BV(2)))     //Shift register clock pin;     Pin 5 (Platine)
+#define OE(x)       ( x ? (PORTC|= _BV(1)) : (PORTC&= ~_BV(1)))     //Output enable (active low);   Pin 4 (Platine)
+#define DS(x)       ( x ? (PORTC|= _BV(0)) : (PORTC&= ~_BV(0)))     //Serial data input;            Pin 3 (Platine)
 
 
 //**************************<Prototypes>***************************************
@@ -32,7 +32,7 @@ void init_hardware(void) {
     // set leds to output
     DDRB = _BV(1) | _BV(2);
     DDRD = _BV(3) | _BV(5);
-    DDRC = _BV(1) | _BV(2) | _BV(3) | _BV(4);
+    DDRC = _BV(0) | _BV(1) | _BV(2) | _BV(3);
 }
 
 //**************************[start]********************************************
@@ -88,9 +88,19 @@ int main (void) {
 
     while (1) {
 
-        set_value(_BV(4));
+        set_value(_BV(2));
         delay_ms(500);
         set_value(_BV(5));
+        delay_ms(500);
+
+        set_value(_BV(3));
+        delay_ms(500);
+        set_value(_BV(6));
+        delay_ms(500);
+
+        set_value(_BV(4));
+        delay_ms(500);
+        set_value(_BV(7));
         delay_ms(500);
     }
     return (0);
