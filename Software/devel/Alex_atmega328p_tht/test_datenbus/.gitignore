@@ -1,0 +1,8 @@
+# robolib - directories
+lib
+tmp
+data
+
+# robolib - files
+*.h
+out.hex
