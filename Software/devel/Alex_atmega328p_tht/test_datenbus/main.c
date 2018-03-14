@@ -4,7 +4,10 @@
 
 #include "gluecksrad.h"
 
-//**************************<Macros>*******************************************
+//**************************<Macros>******************************************
+#define led_setRed(x)   ( x ? (PORTB |= _BV(1)) : (PORTB &= ~_BV(1)))
+#define led_setGreen(x) ( x ? (PORTB |= _BV(2)) : (PORTB &= ~_BV(2)))
+#define led_setBlue(x)  ( x ? (PORTD |= _BV(5)) : (PORTD &= ~_BV(5)))
 
 #define button_getBumper() ((PIND & _BV(4)) == 0x00)
 
@@ -72,7 +75,7 @@ void updateLEDs(void) {
         if (led[2]) { byte |= _BV(7); } // R1
         if (led[3]) { byte |= _BV(2); } // B2
         if (led[4]) { byte |= _BV(3); } // G2
-        if (led=5]) { byte |= _BV(4); } // R2
+        if (led[5]) { byte |= _BV(4); } // R2
 
         while (b--) {
             DS(byte & _BV(7));
