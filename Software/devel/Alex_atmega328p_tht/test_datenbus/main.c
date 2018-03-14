@@ -5,9 +5,6 @@
 #include "gluecksrad.h"
 
 //**************************<Macros>*******************************************
-#define led_setRed(x)   ( x ? (PORTB |= _BV(1)) : (PORTB &= ~_BV(1)))
-#define led_setGreen(x) ( x ? (PORTB |= _BV(2)) : (PORTB &= ~_BV(2)))
-#define led_setBlue(x)  ( x ? (PORTD |= _BV(5)) : (PORTD &= ~_BV(5)))
 
 #define button_getBumper() ((PIND & _BV(4)) == 0x00)
 
@@ -22,8 +19,6 @@ void init_hardware(void);
 void display_state(uint8_t state);
 int main (void);
 
-//**************************<Methods>******************************************
-
 //**************************[init_hardware]************************************
 void init_hardware(void) {
 
@@ -31,20 +26,6 @@ void init_hardware(void) {
     DDRB = _BV(1) | _BV(2);
     DDRD = _BV(3) | _BV(5);
     DDRC = _BV(0) | _BV(1) | _BV(2) | _BV(3);
-}
-
-//**************************[display_state]************************************
-void display_state(uint8_t state) {
-
-    switch (state) {
-        case  0: led_setRed(1); led_setGreen(0); led_setBlue(0); break;
-        case  1: led_setRed(0); led_setGreen(1); led_setBlue(0); break;
-        case  2: led_setRed(0); led_setGreen(0); led_setBlue(1); break;
-        case  3: led_setRed(1); led_setGreen(1); led_setBlue(0); break;
-        case  4: led_setRed(1); led_setGreen(0); led_setBlue(1); break;
-        case  5: led_setRed(0); led_setGreen(1); led_setBlue(1); break;
-        default: led_setRed(1); led_setGreen(1); led_setBlue(0); break;
-    }
 }
 
 //*****************************[LED_API]***************************************
@@ -73,27 +54,29 @@ void setLED(uint8_t i, uint8_t r, uint8_t g, uint8_t b) {
 
 void clearLEDs(void) {
     uint16_t i = 3 * LED_COUNT;
-    while(i--) led_states[i] = 0;
+    while (i--) led_states[i] = 0;
 }
 
 //write led_states to register and show them
 void updateLEDs(void) {
     uint8_t i = LED_COUNT;
 
-    while(i--) {
+    while (i--) {
 
         uint8_t b = 8;
         uint8_t byte = 0x00;
-        if (led_states[6*i + 0]) { byte|= _BV(5); } // B1
-        if (led_states[6*i + 1]) { byte|= _BV(6); } // G1
-        if (led_states[6*i + 2]) { byte|= _BV(7); } // R1
-        if (led_states[6*i + 3]) { byte|= _BV(2); } // B2
-        if (led_states[6*i + 4]) { byte|= _BV(3); } // G2
-        if (led_states[6*i + 5]) { byte|= _BV(4); } // R2
+        uint8_t *led = led_states + 6 * i;
+        
+        if (led[0]) { byte |= _BV(5); } // B1
+        if (led[1]) { byte |= _BV(6); } // G1
+        if (led[2]) { byte |= _BV(7); } // R1
+        if (led[3]) { byte |= _BV(2); } // B2
+        if (led[4]) { byte |= _BV(3); } // G2
+        if (led=5]) { byte |= _BV(4); } // R2
 
         while (b--) {
             DS(byte & _BV(7));
-            byte<<= 1;
+            byte <<= 1;
 
             delay_us(1);
             SH_CP(1);
@@ -120,8 +103,8 @@ int main (void) {
 
     //test rgb for each LED
     while (1) {
-        for(i = 0; i < 3; i++) {
-            setLED(n, !i, !(i - 1), !(i - 2));
+        for (i = 0; i < 3; i++) {
+            setLED(n, i == 0, i == 1, i == 2);
             updateLEDs();
             delay_ms(400);
         }
