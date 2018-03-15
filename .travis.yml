@@ -1,0 +1,13 @@
+language: C
+sudo: required
+
+before_install:
+before_script:
+script:
+  - # download and config robolib
+  - cd travis/ && . 1_robolib.sh
+  - # start build tests
+  - cd travis/ && . 2_build_all.sh
+  - # final output
+  - cd travis/ && . 3_final.sh
+
