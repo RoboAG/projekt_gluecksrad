@@ -4,11 +4,13 @@
 
 
 
+echo ""
 echo "### Sourcing robolib"
 . ../../robolib/scripts/bashrc.sh
 
 
 
+echo ""
 echo "### Building"
 cd ../Software/
 PATH_SOFTWARE="$(pwd)/"
@@ -16,6 +18,7 @@ PATH_DEVEL="${PATH_SOFTWARE}devel/"
 
 
 
+echo ""
 echo "## Tim"
 PATH_TIM="${PATH_DEVEL}Tim_atmeg88p_smd/"
 
@@ -27,6 +30,7 @@ robolib_all
 
 
 
+echo ""
 echo "## Richard"
 PATH_RICHARD="${PATH_DEVEL}Richard_atmega328p_tht/"
 
@@ -38,6 +42,7 @@ robolib_all
 
 
 
+echo ""
 echo "## Alex"
 PATH_RICHARD="${PATH_DEVEL}Alex_atmega328p_tht/"
 
