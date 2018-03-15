@@ -4,15 +4,4 @@ sudo: required
 before_install:
 before_script:
 script:
-  - # switch to scripts directory
-  - cd travis/
-  - # download and config robolib
-  - pwd
-  - . 1_robolib.sh
-  - # start build tests
-  - pwd
-  - . 2_build_all.sh
-  - # final output
-  - pwd
-  - . 3_final.sh
-
+  - cd travis/ && . 0_travis_main.sh
