@@ -7,7 +7,7 @@
 if [ $? -ne 0 ]; then
     echo ""
     echo "### errors occurred  :-("
-    return -1
+    exit -1
 else
     echo ""
     echo "### all done :-)"
