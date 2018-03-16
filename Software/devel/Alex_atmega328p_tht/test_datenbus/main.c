@@ -57,29 +57,29 @@ void setLED(uint8_t i, uint8_t r, uint8_t g, uint8_t b) {
 
 void clearLEDs(void) {
     uint16_t i = 3 * LED_COUNT;
-    while (i--) led_states[i] = 0;
+    while (i--) led_states[i] = 0;
 }
 
 //write led_states to register and show them
 void updateLEDs(void) {
     uint8_t i = LED_COUNT;
 
-    while (i--) {
+    while (i--) {
 
         uint8_t b = 8;
         uint8_t byte = 0x00;
-        uint8_t *led = led_states + 6 * i;
-        
-        if (led[0]) { byte |= _BV(5); } // B1
-        if (led[1]) { byte |= _BV(6); } // G1
-        if (led[2]) { byte |= _BV(7); } // R1
-        if (led[3]) { byte |= _BV(2); } // B2
-        if (led[4]) { byte |= _BV(3); } // G2
-        if (led[5]) { byte |= _BV(4); } // R2
+        uint8_t *led = led_states + 6 * i;
+
+        if (led[0]) { byte |= _BV(5); } // B1
+        if (led[1]) { byte |= _BV(6); } // G1
+        if (led[2]) { byte |= _BV(7); } // R1
+        if (led[3]) { byte |= _BV(2); } // B2
+        if (led[4]) { byte |= _BV(3); } // G2
+        if (led[5]) { byte |= _BV(4); } // R2
 
         while (b--) {
             DS(byte & _BV(7));
-            byte <<= 1;
+            byte <<= 1;
 
             delay_us(1);
             SH_CP(1);
@@ -106,8 +106,8 @@ int main (void) {
 
     //test rgb for each LED
     while (1) {
-        for (i = 0; i < 3; i++) {
-            setLED(n, i == 0, i == 1, i == 2);
+        for (i = 0; i < 3; i++) {
+            setLED(n, i == 0, i == 1, i == 2);
             updateLEDs();
             delay_ms(400);
         }
