@@ -1,5 +1,6 @@
 //*******************************<Included files>*******************************#
 #include <avr/io.h>
+#include <avr/eeprom.h>
 #include <inttypes.h>
 
 #include "gluecksrad.h"
@@ -109,20 +110,71 @@ int main (void) {
 
     // initialize hardware
     init_hardware();
+    
+    uint16_t address = eeprom_adress_get();
+    
+    //show address in binary if address != 0
+    if(address) {
+        setLED(0, 1, 1, 1);
+        uint8_t i;
+        for(i = 0; i < LED_COUNT; i++)
+            if(address & 1 << i) setLED(i + 1, 1, 0, 0);
+        
+        updateLEDs();
+        delay_ms(3000);
+    }
 
-    uint8_t i, n = 0;
-
-    //test rgb for each LED
+    #define DATA_LEN 4
+    uint16_t data[DATA_LEN] = {
+        0b1111111111111111,
+        0b1010101010101010,
+        0b0101010101010101,
+        0b0100010001010001
+    };
+    
+    uint8_t i, j;
+    uint16_t temp_data;
+    
+    //test eeprom
     while (1) {
-        for (i = 0; i < 3; i++) {
-            setLED(n, i == 0, i == 1, i == 2);
+        
+        clearLEDs();
+        setLED(0, 0, 0, 1);
+        updateLEDs();
+        delay_ms(1000);
+        
+        eeprom_adress_set(0);
+        
+        //write to eeprom
+        for(i = 0; i < DATA_LEN; i++) {
+            eeprom_write_uint16(data[i]);
+            clearLEDs();
+            setLED(0, 0, 0, 1);
+            for(j = 0; j < 16; j++) {
+                if(data[i] & 1 << j) setLED(j + 1, 1, 1, 1);
+            }
             updateLEDs();
-            delay_ms(300);
+            delay_ms(500);
         }
-        clearLED(n);
-
-        ++n;
-        if (n >= LED_COUNT) n = 0;
+        
+        clearLEDs();
+        setLED(0, 0, 1, 0);
+        updateLEDs();
+        delay_ms(1000);
+        
+        eeprom_adress_set(0);
+        
+        //read from eeprom
+        for(i = 0; i < DATA_LEN; i++) {
+            temp_data = eeprom_read_uint16();
+            clearLEDs();
+            setLED(0, 0, 1, 0);
+            for(j = 0; j < 16; j++) {
+                if(temp_data & 1 << j) setLED(j + 1, 1, 1, 1);
+            }
+            updateLEDs();
+            delay_ms(500);
+        }
     }
 
     return (0);

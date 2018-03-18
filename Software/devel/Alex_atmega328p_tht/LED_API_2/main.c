@@ -9,7 +9,8 @@
 #define led_setGreen(x) ( x ? (PORTB |= _BV(2)) : (PORTB &= ~_BV(2)))
 #define led_setBlue(x)  ( x ? (PORTD |= _BV(5)) : (PORTD &= ~_BV(5)))
 
-#define button_getBumper() ((PIND & _BV(4)) == 0x00)
+//n e {0, 1, 2}
+#define getButton(n) ((PINC & _BV(4 + n)) == 0)
 
 #define ST_CP(x)    ( x ? (PORTC |= _BV(3)) : (PORTC &= ~_BV(3)))     //Storage register clock pin;   Pin 6 (Platine)
 #define SH_CP(x)    ( x ? (PORTC |= _BV(2)) : (PORTC &= ~_BV(2)))     //Shift register clock pin;     Pin 5 (Platine)
