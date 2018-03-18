@@ -1,10 +1,10 @@
-//**************************<Included files>***********************************
+//*******************************<Included files>*******************************
 #include <avr/io.h>
 #include <inttypes.h>
 
 #include "gluecksrad.h"
 
-//**************************<Macros>******************************************
+//***********************************<Macros>***********************************
 #define led_setRed(x)   ( x ? (PORTB |= _BV(1)) : (PORTB &= ~_BV(1)))
 #define led_setGreen(x) ( x ? (PORTB |= _BV(2)) : (PORTB &= ~_BV(2)))
 #define led_setBlue(x)  ( x ? (PORTD |= _BV(5)) : (PORTD &= ~_BV(5)))
@@ -17,12 +17,12 @@
 #define DS(x)       ( x ? (PORTC |= _BV(0)) : (PORTC &= ~_BV(0)))     //Serial data input;            Pin 3 (Platine)
 
 
-//**************************<Prototypes>***************************************
+//**********************************<Prototypes>********************************
 void init_hardware(void);
 void display_state(uint8_t state);
 int main (void);
 
-//**************************[init_hardware]************************************
+//********************************[init_hardware]********************************
 void init_hardware(void) {
 
     // set leds to output
@@ -31,19 +31,24 @@ void init_hardware(void) {
     DDRC = _BV(0) | _BV(1) | _BV(2) | _BV(3);
 }
 
-//*****************************[LED_API]***************************************
+//***********************************[LED_API]***********************************
 
-//amount of led circuit boards containing two LEDs
-#define LED_COUNT 10
+//amount of leds on every circuit board (2 * amount of boards)
+#define LED_COUNT 20
+
 
 //leds -> array of rgb structs
 struct LEDstate {
     uint8_t r, g, b;
-} leds[LED_COUNT];
+} leds[2 * LED_COUNT];
 
 #define setLED(i, _r, _g, _b) leds[i] = (struct LEDstate) {.r=_r, .g=_g, .b=_b }
-#define clearLED(i) setLED(i, 0, 0, 0)
+void setLEDs(uint8_t r, uint8_t g, uint8_t b) {
+    uint8_t i = LED_COUNT;
+    while(i--) setLED(i, r, g, b)
+}
 
+#define clearLED(i) setLED(i, 0, 0, 0)
 void clearLEDs(void) {
     uint16_t i;
     for (i = 0; i < LED_COUNT; i++) clearLED(i);
@@ -87,7 +92,7 @@ void updateLEDs(void) {
     ST_CP(0);
 }
 
-//**************************[main]*********************************************
+//**********************************[functions]*********************************
 int main (void) {
 
     // initialize hardware
@@ -100,11 +105,11 @@ int main (void) {
         for (i = 0; i < 3; i++) {
             setLED(n, i == 0, i == 1, i == 2);
             updateLEDs();
-            delay_ms(400);
+            delay_ms(300);
         }
         clearLED(n);
 
-        n++;
+        ++n;
         if (n >= LED_COUNT) n = 0;
     }
 

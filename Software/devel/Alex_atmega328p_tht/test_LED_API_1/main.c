@@ -1,10 +1,10 @@
-//**************************<Included files>***********************************
+//*******************************<Included files>*******************************#
 #include <avr/io.h>
 #include <inttypes.h>
 
 #include "gluecksrad.h"
 
-//**************************<Macros>******************************************
+//***********************************<Macros>***********************************
 #define led_setRed(x)   ( x ? (PORTB |= _BV(1)) : (PORTB &= ~_BV(1)))
 #define led_setGreen(x) ( x ? (PORTB |= _BV(2)) : (PORTB &= ~_BV(2)))
 #define led_setBlue(x)  ( x ? (PORTD |= _BV(5)) : (PORTD &= ~_BV(5)))
@@ -17,12 +17,12 @@
 #define DS(x)       ( x ? (PORTC |= _BV(0)) : (PORTC &= ~_BV(0)))     //Serial data input;            Pin 3 (Platine)
 
 
-//**************************<Prototypes>***************************************
+//**********************************<Prototypes>********************************
 void init_hardware(void);
 void display_state(uint8_t state);
 int main (void);
 
-//**************************[init_hardware]************************************
+//********************************[init_hardware]********************************
 void init_hardware(void) {
 
     // set leds to output
@@ -31,7 +31,7 @@ void init_hardware(void) {
     DDRC = _BV(0) | _BV(1) | _BV(2) | _BV(3);
 }
 
-//*****************************[LED_API]***************************************
+//***********************************[LED_API]***********************************
 
 #define R 2
 #define G 1
@@ -101,7 +101,7 @@ void updateLEDs(void) {
     ST_CP(0);
 }
 
-//**************************[main]*********************************************
+//**********************************[functions]*********************************
 int main (void) {
 
     // initialize hardware
@@ -114,11 +114,11 @@ int main (void) {
         for (i = 0; i < 3; i++) {
             setLED(n, i == 0, i == 1, i == 2);
             updateLEDs();
-            delay_ms(400);
+            delay_ms(300);
         }
         clearLED(n);
 
-        n++;
+        ++n;
         if (n >= LED_COUNT) n = 0;
     }
 
