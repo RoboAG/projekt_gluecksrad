@@ -50,6 +50,7 @@ bgr array: { p1.b1, p1.g1, p1.r1, p1.b2, p1.g2, p1.r2,
 */
 
 uint8_t led_states[3 * LED_COUNT];
+#define getLED(i) (led_states+3*i)
 
 //set rgb values for specific led
 void setLED(uint8_t i, uint8_t r, uint8_t g, uint8_t b) {
@@ -59,7 +60,7 @@ void setLED(uint8_t i, uint8_t r, uint8_t g, uint8_t b) {
 
 void setLEDs(uint8_t r, uint8_t g, uint8_t b) {
     uint8_t i = LED_COUNT;
-    while(i--) setLED(i, r, g, b)
+    while(i--) setLED(i, r, g, b);
 }
 
 #define clearLED(i) setLED(i, 0, 0, 0)
@@ -117,7 +118,7 @@ int main (void) {
             if(getButton(i) != btn_states[i]) {
                 changed = 1;
                 btn_states[i] = ~btn_states[i];
-                setLED(i, btn_states[i]);
+                setLED(i, btn_states[i], btn_states[i], btn_states[i]);
             }
             
             if(changed) {

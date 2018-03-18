@@ -45,7 +45,7 @@ struct LEDstate {
 #define setLED(i, _r, _g, _b) leds[i] = (struct LEDstate) {.r=_r, .g=_g, .b=_b }
 void setLEDs(uint8_t r, uint8_t g, uint8_t b) {
     uint8_t i = LED_COUNT;
-    while(i--) setLED(i, r, g, b)
+    while(i--) setLED(i, r, g, b);
 }
 
 #define clearLED(i) setLED(i, 0, 0, 0)
