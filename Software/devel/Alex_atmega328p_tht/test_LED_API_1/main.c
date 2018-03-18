@@ -37,12 +37,17 @@ void init_hardware(void) {
 #define G 1
 #define B 0
 
-#define LED_COUNT 10
-//bgr array: { {p1.b1, p1.g1, p1.r1, p1.b2, p1.g2, p1.r2},
-//             {p2.b1, p2.g1, p2.r1, p2.b2, p2.g2, p2.r2},
-//             {p3...},
-//             ...
-//           }
+//amount of led circuit boards containing two LEDs
+#define LED_COUNT 10  
+
+/*
+bgr array: { p1.b1, p1.g1, p1.r1, p1.b2, p1.g2, p1.r2,
+             p2.b1, p2.g1, p2.r1, p2.b2, p2.g2, p2.r2,
+             p3...,
+             ...
+           }
+*/
+
 uint8_t led_states[6 * LED_COUNT];
 
 
@@ -70,12 +75,12 @@ void updateLEDs(void) {
         uint8_t byte = 0x00;
         uint8_t *led = led_states + 6 * i;
 
-        if (led[0]) { byte |= _BV(5); } // B1
-        if (led[1]) { byte |= _BV(6); } // G1
-        if (led[2]) { byte |= _BV(7); } // R1
-        if (led[3]) { byte |= _BV(2); } // B2
-        if (led[4]) { byte |= _BV(3); } // G2
-        if (led[5]) { byte |= _BV(4); } // R2
+        if (led[0]) byte |= _BV(5); // B1
+        if (led[1]) byte |= _BV(6); // G1
+        if (led[2]) byte |= _BV(7); // R1
+        if (led[3]) byte |= _BV(2); // B2
+        if (led[4]) byte |= _BV(3); // G2
+        if (led[5]) byte |= _BV(4); // R2
 
         while (b--) {
             DS(byte & _BV(7));
@@ -114,7 +119,7 @@ int main (void) {
         clearLED(n);
 
         n++;
-        if (n >= LED_COUNT) {n = 0;}
+        if (n >= LED_COUNT) n = 0;
     }
 
     return (0);
