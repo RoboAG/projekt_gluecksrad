@@ -1,6 +1,5 @@
 //*******************************<Included files>*******************************#
 #include <avr/io.h>
-#include <avr/eeprom.h>
 #include <inttypes.h>
 
 #include "gluecksrad.h"
