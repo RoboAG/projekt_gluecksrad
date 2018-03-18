@@ -38,7 +38,7 @@ void init_hardware(void) {
 #define B 0
 
 //amount of led circuit boards containing two LEDs
-#define LED_COUNT 10  
+#define LED_COUNT 20  
 
 /*
 bgr array: { p1.b1, p1.g1, p1.r1, p1.b2, p1.g2, p1.r2,
@@ -48,18 +48,20 @@ bgr array: { p1.b1, p1.g1, p1.r1, p1.b2, p1.g2, p1.r2,
            }
 */
 
-uint8_t led_states[6 * LED_COUNT];
+uint8_t led_states[3 * LED_COUNT];
 
-
-#define getLED(i) (led_states+3*i)
 //set rgb values for specific led
 void setLED(uint8_t i, uint8_t r, uint8_t g, uint8_t b) {
     uint8_t *led = getLED(i);
     led[R] = r; led[G] = g; led[B] = b;
 }
 
-#define clearLED(i) setLED(i, 0, 0, 0)
+void setLEDs(uint8_t r, uint8_t g, uint8_t b) {
+    uint8_t i = LED_COUNT;
+    while(i--) setLED(i, r, g, b)
+}
 
+#define clearLED(i) setLED(i, 0, 0, 0)
 void clearLEDs(void) {
     uint16_t i = 3 * LED_COUNT;
     while (i--) led_states[i] = 0;
@@ -67,21 +69,20 @@ void clearLEDs(void) {
 
 //write led_states to register and show them
 void updateLEDs(void) {
-    uint8_t i = LED_COUNT;
+    uint8_t i = LED_COUNT / 2, b, byte, *led = led_states;
 
     while (i--) {
+        byte = 0;
 
-        uint8_t b = 8;
-        uint8_t byte = 0x00;
-        uint8_t *led = led_states + 6 * i;
+        //don't change the order! add led[n] and led += 6; before!
+        if (*led++) byte |= _BV(5); // B1
+        if (*led++) byte |= _BV(6); // G1
+        if (*led++) byte |= _BV(7); // R1
+        if (*led++) byte |= _BV(2); // B2
+        if (*led++) byte |= _BV(3); // G2
+        if (*led++) byte |= _BV(4); // R2
 
-        if (led[0]) byte |= _BV(5); // B1
-        if (led[1]) byte |= _BV(6); // G1
-        if (led[2]) byte |= _BV(7); // R1
-        if (led[3]) byte |= _BV(2); // B2
-        if (led[4]) byte |= _BV(3); // G2
-        if (led[5]) byte |= _BV(4); // R2
-
+        b = 8;
         while (b--) {
             DS(byte & _BV(7));
             byte <<= 1;
