@@ -118,7 +118,6 @@ int main (void) {
             if(getButton(i) != btn_states[i]) 
                 btn_states[i] = ~btn_states[i];
         
-        clearLEDs();
         for(i = 0; i < LED_COUNT; i++)
             setLED(i, btn_states[i%3], btn_states[i%3], btn_states[i%3]);
         updateLEDs();
