@@ -5,12 +5,9 @@
 #include "gluecksrad.h"
 
 //***********************************<Macros>***********************************
-#define led_setRed(x)   ( x ? (PORTB |= _BV(1)) : (PORTB &= ~_BV(1)))
-#define led_setGreen(x) ( x ? (PORTB |= _BV(2)) : (PORTB &= ~_BV(2)))
-#define led_setBlue(x)  ( x ? (PORTD |= _BV(5)) : (PORTD &= ~_BV(5)))
 
-#define getBtnBumper() ((PORTB & _BV(0)) == 0x00)
-#define getBtnMode()   ((PORTD & _BV(4)) == 0x00)
+#define getBtnBumper() ((PINB & _BV(0)) == 0x00)
+#define getBtnMode()   ((PIND & _BV(4)) == 0x00)
 
 #define ST_CP(x)    ( x ? (PORTC |= _BV(3)) : (PORTC &= ~_BV(3)))     //Storage register clock pin;   Pin 6 (Platine)
 #define SH_CP(x)    ( x ? (PORTC |= _BV(2)) : (PORTC &= ~_BV(2)))     //Shift register clock pin;     Pin 5 (Platine)
@@ -110,7 +107,7 @@ int main (void) {
     // initialize hardware
     init_hardware();
 
-    uint8_t i, btn_states[] = {0, 0};
+    uint8_t i, btn_states[2] = {0, 0};
     
     //test buttons
     while (1) {
