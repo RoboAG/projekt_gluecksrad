@@ -77,12 +77,13 @@ void updateLEDs(void) {
         byte = 0;
 
         //don't change the order! add led[n] and led += 6; before!
-        if (*led++) byte |= _BV(5); // B1
-        if (*led++) byte |= _BV(6); // G1
-        if (*led++) byte |= _BV(7); // R1
         if (*led++) byte |= _BV(2); // B2
         if (*led++) byte |= _BV(3); // G2
         if (*led++) byte |= _BV(4); // R2
+        
+        if (*led++) byte |= _BV(5); // B1
+        if (*led++) byte |= _BV(6); // G1
+        if (*led++) byte |= _BV(7); // R1
 
         b = 8;
         while (b--) {
