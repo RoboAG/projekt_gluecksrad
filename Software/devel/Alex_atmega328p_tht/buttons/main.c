@@ -114,12 +114,11 @@ int main (void) {
     
     //test buttons
     while (1) {
-        for(i = 0; i < 3; i++)
-            if(getButton(i) != btn_states[i]) 
-                btn_states[i] = ~btn_states[i];
+        for(i = 0; i < 2; i++)
+            btn_states[i] = getButton(i);
         
         for(i = 0; i < LED_COUNT; i++)
-            setLED(i, btn_states[i%3], btn_states[i%3], btn_states[i%3]);
+            setLED(i, btn_states[i%2], btn_states[i%2], btn_states[i%2]);
         updateLEDs();
     }
 
