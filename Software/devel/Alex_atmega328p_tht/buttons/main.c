@@ -110,22 +110,16 @@ int main (void) {
     // initialize hardware
     init_hardware();
 
-    uint8_t i, changed = 0, btn_states[] = {0, 0, 0};
+    uint8_t i, btn_states[] = {0, 0, 0};
     
     //test buttons
     while (1) {
-        for(i = 0; i < 3; i++) {
-            if(getButton(i) != btn_states[i]) {
-                changed = 1;
+        for(i = 0; i < 3; i++)
+            if(getButton(i) != btn_states[i]) 
                 btn_states[i] = ~btn_states[i];
-                setLED(i, btn_states[i], btn_states[i], btn_states[i]);
-            }
-            
-            if(changed) {
-                changed = 0;
-                updateLEDs();
-            }
-        }
+        
+        for(i = 0; i < LED_COUNT; i++)
+            setLED(i, btn_states[i%3], btn_states[i%3], btn_states[i%3]);
     }
 
     return (0);
