@@ -9,8 +9,9 @@
 #define led_setGreen(x) ( x ? (PORTB |= _BV(2)) : (PORTB &= ~_BV(2)))
 #define led_setBlue(x)  ( x ? (PORTD |= _BV(5)) : (PORTD &= ~_BV(5)))
 
-//n e {0, 1, 2}
-#define getButton(n) ((PINC & _BV(4 + n)) == 0)
+#define getBumper() ((PIND & _BV(4)) == 0x00)
+#define getButton1() ((PINC & _BV(4)) == 0x00)
+#define getButton2() ((PINC & _BV(5)) == 0x00)
 
 #define ST_CP(x)    ( x ? (PORTC |= _BV(3)) : (PORTC &= ~_BV(3)))     //Storage register clock pin;   Pin 6 (Platine)
 #define SH_CP(x)    ( x ? (PORTC |= _BV(2)) : (PORTC &= ~_BV(2)))     //Shift register clock pin;     Pin 5 (Platine)
@@ -114,12 +115,15 @@ int main (void) {
     
     //test buttons
     while (1) {
-        for(i = 0; i < 2; i++)
-            btn_states[i] = getButton(i);
+        btn_states[0] = getBumper();
+        btn_states[1] = getButton1();
+        btn_states[2] = getButton2();
         
         for(i = 0; i < LED_COUNT; i++)
-            setLED(i, btn_states[i%2], btn_states[i%2], btn_states[i%2]);
+            setLED(i, btn_states[i%3], btn_states[i%3], btn_states[i%3]);
+        
         updateLEDs();
+        delay_ms(50); //slow down
     }
 
     return (0);
