@@ -50,6 +50,23 @@ echo ""
 echo "## Alex"
 PATH_RICHARD="${PATH_DEVEL}Alex_atmega328p_tht/"
 
-cd ${PATH_RICHARD}test_datenbus/
+cd ${PATH_RICHARD}buttons/
 robolib_all
 if [ $? -ne 0 ]; then exit -1; fi
+
+cd ${PATH_RICHARD}eeprom/
+robolib_all
+if [ $? -ne 0 ]; then exit -1; fi
+
+cd ${PATH_RICHARD}LED_API_1/
+robolib_all
+if [ $? -ne 0 ]; then exit -1; fi
+
+cd ${PATH_RICHARD}LED_API_2/
+robolib_all
+if [ $? -ne 0 ]; then exit -1; fi
+
+cd ${PATH_RICHARD}test/
+robolib_all
+if [ $? -ne 0 ]; then exit -1; fi
+
