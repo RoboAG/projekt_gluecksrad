@@ -48,25 +48,28 @@ if [ $? -ne 0 ]; then exit -1; fi
 
 echo ""
 echo "## Alex"
-PATH_RICHARD="${PATH_DEVEL}Alex_atmega328p_tht/"
+PATH_ALEX="${PATH_DEVEL}Alex_atmega328p_tht/"
 
-cd ${PATH_RICHARD}buttons/
+cd ${PATH_ALEX}buttons/
 robolib_all
 if [ $? -ne 0 ]; then exit -1; fi
 
-cd ${PATH_RICHARD}eeprom/
+cd ${PATH_ALEX}eeprom/
 robolib_all
 if [ $? -ne 0 ]; then exit -1; fi
 
-cd ${PATH_RICHARD}LED_API_1/
+cd ${PATH_ALEX}LED_API_1/
 robolib_all
 if [ $? -ne 0 ]; then exit -1; fi
 
-cd ${PATH_RICHARD}LED_API_2/
+cd ${PATH_ALEX}LED_API_2/
 robolib_all
 if [ $? -ne 0 ]; then exit -1; fi
 
-cd ${PATH_RICHARD}test/
+cd ${PATH_ALEX}timer/
 robolib_all
 if [ $? -ne 0 ]; then exit -1; fi
 
+#cd ${PATH_ALEX}test/
+#robolib_all
+#if [ $? -ne 0 ]; then exit -1; fi
