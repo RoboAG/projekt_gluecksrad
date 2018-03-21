@@ -83,3 +83,7 @@ PATH_ALEX="${PATH_DEVEL}Peter/"
 cd ${PATH_ALEX}leds1/
 robolib_all
 if [ $? -ne 0 ]; then exit -1; fi
+
+cd ${PATH_ALEX}leds2/
+robolib_all
+if [ $? -ne 0 ]; then exit -1; fi
