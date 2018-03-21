@@ -34,7 +34,7 @@ if [ $? -ne 0 ]; then exit -1; fi
 
 echo ""
 echo "## Richard"
-PATH_RICHARD="${PATH_DEVEL}Richard_atmega328p_tht/"
+PATH_RICHARD="${PATH_DEVEL}Richard/"
 
 cd ${PATH_RICHARD}test_simple/
 robolib_all
@@ -48,7 +48,7 @@ if [ $? -ne 0 ]; then exit -1; fi
 
 echo ""
 echo "## Alex"
-PATH_ALEX="${PATH_DEVEL}Alex_atmega328p_tht/"
+PATH_ALEX="${PATH_DEVEL}Alex/"
 
 cd ${PATH_ALEX}buttons/
 robolib_all
@@ -73,3 +73,13 @@ if [ $? -ne 0 ]; then exit -1; fi
 #cd ${PATH_ALEX}test/
 #robolib_all
 #if [ $? -ne 0 ]; then exit -1; fi
+
+
+
+echo ""
+echo "## Peter"
+PATH_ALEX="${PATH_DEVEL}Peter/"
+
+cd ${PATH_ALEX}leds1/
+robolib_all
+if [ $? -ne 0 ]; then exit -1; fi
