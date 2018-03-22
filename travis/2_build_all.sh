@@ -91,3 +91,7 @@ if [ $? -ne 0 ]; then exit -1; fi
 cd ${PATH_ALEX}cover/
 robolib_all
 if [ $? -ne 0 ]; then exit -1; fi
+
+cd ${PATH_ALEX}random/
+robolib_all
+if [ $? -ne 0 ]; then exit -1; fi
