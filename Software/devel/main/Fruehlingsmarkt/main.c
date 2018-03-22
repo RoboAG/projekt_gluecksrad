@@ -37,7 +37,7 @@
 
 #define ROT_VEL 200
 
-const struct sLed price_colors[PRICES_MAX+1] = {
+const struct sLed price_colors[PRICES_MAX + 1] = {
     { 0,  0,  0},
     { 0,  0, 10},
     { 0, 10,  0},
@@ -75,8 +75,8 @@ int  main (void);
 
 
 //*********************************[getLedPrice]********************************
-uint8_t getLedPrice(uint8_t i) {
-
+uint8_t getLedPrice(uint8_t i)
+{
     if (i            >= 20) return 0; // impossible value ( 0%)
     if (i        %       2) return 1; // 1, 3, 5, ..., 19 (50%)
     if ((i % 10) % 6 ==  0) return 2; // 0, 6, 10, 16     (20%)
@@ -93,8 +93,8 @@ uint8_t getLedPrice(uint8_t i) {
 // 32-bit timer in milliseconds -> overflow after: 49d 17h 2m 47s 296ms
 uint32_t  time_cur = 0,  time_last = 0;
 
-void updateTime (void) {
-
+void updateTime (void)
+{
     time_last = time_cur;
     time_cur = systick_get();
 }
@@ -111,12 +111,12 @@ uint16_t price_sum = 620;
 
 //use a specific key to check whether the eeprom
 //is on the actual gluecksrad program version
-int eeprom_validate (void) {
-
+int eeprom_validate (void)
+{
     eeprom_adress_set(0);                     // 0
     if (eeprom_read_uint16() == EEPROM_KEY && // 2
         eeprom_read_uint16() == EEPROM_KEY    // 4
-    ) {
+    ) {        
         return 1;
     }
     else
@@ -129,8 +129,8 @@ int eeprom_validate (void) {
 }
 
 //read and write prices
-void eeprom_getPrices (void) {
-
+void eeprom_getPrices (void)
+{
     eeprom_adress_set(4);             // 4
     prices[0] = eeprom_read_uint16(); // 6
     prices[1] = eeprom_read_uint16(); // 8
@@ -141,8 +141,8 @@ void eeprom_getPrices (void) {
     price_sum = prices[1] + prices[2] + prices[3] + prices[4] + prices[5];
 }
 
-void eeprom_setPrices (void) {
-
+void eeprom_setPrices (void)
+{
     eeprom_adress_set(4);           // 4
     eeprom_write_uint16(prices[0]); // 6
     eeprom_write_uint16(prices[1]); // 8
@@ -157,8 +157,8 @@ void eeprom_setPrices (void) {
 
 //*********************************[random]*************************************
 
-uint8_t getRotationTarget(void) {
-
+uint8_t getRotationTarget(void)
+{
     if (!price_sum) return 0;
 
     // choose random price
@@ -175,14 +175,17 @@ uint8_t getRotationTarget(void) {
     // select field of category
     uint8_t i;
     uint8_t count = 0;
-    for (i = 0; i < LEDS_MAX; i++) {
-        if (getLedPrice(i) == cat) {count++;}
+    for (i = 0; i < LEDS_MAX; i++)
+{        if (getLedPrice(i) == cat) {count++;}
     }
 
     count = rand % count;
-    for (i = 0; i < LEDS_MAX; i++) {
-        if (getLedPrice(i) == cat) {
-            if (count == 0) {
+    for (i = 0; i < LEDS_MAX; i++)
+    {
+        if (getLedPrice(i) == cat)
+        {
+            if (count == 0)
+            {
                 return i;
             }
             count--;
@@ -196,13 +199,13 @@ uint8_t getRotationTarget(void) {
 
 //*********************************[init]***************************************
 // initialize program
-void gluecksrad_init (void) {
-
+void gluecksrad_init (void)
+{
     leds_init();
     robolib_init();
     leds_clearAll();
 
-    if(eeprom_validate()) eeprom_getPrices();
+    if (eeprom_validate()) eeprom_getPrices();
     else eeprom_setPrices();
 
     updateTime();
@@ -236,8 +239,8 @@ float rot_acc, rot_time, rot_led_start;
 
 
 //*********************************[setState]***********************************
-void setState(uint8_t st) {
-
+void setState (uint8_t st)
+{
     state = st;
     anim_start = cur_time;
 }
@@ -277,7 +280,11 @@ void animate (void)
             }
 
             if (diff + 1 > rot_time && led == rot_target)
+            {
                 setState(STATE_ROTATE_FINISHED);
+                prices[rot_target]--;
+                eeprom_setPrices();
+            }
         }
         break;
 
@@ -307,7 +314,8 @@ void animate (void)
 
 
 //************************************[main]************************************
-int main (void) {
+int main (void)
+{    
     // initialize
     gluecksrad_init();
 
@@ -316,7 +324,7 @@ int main (void) {
     // main loop
     while (1)
     {
-        updateTime();
+       updateTime();
 
         if (state == STATE_DEMO && buttons_getBumper())
         {
@@ -342,7 +350,7 @@ int main (void) {
                 break;
 
                 case STATE_DEMO:
-                {
+                { 
                     setState(STATE_RESET_PRICES);
                     time_btnMode_start = time_cur;
                 }
