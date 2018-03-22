@@ -13,6 +13,7 @@
 
 
 //*********************************<Included files>*****************************
+#include <math.h>
 #include <avr/io.h>
 #include <inttypes.h>
 
@@ -29,7 +30,7 @@
 
 
 //*********************************<Constants>**********************************
-#define VERSION 001
+#define VERSION 002
 #define EEPROM_KEY (0b1010011101100000 + VERSION)
 #define EEPROM_RESET_DELAY 5000
 #define PRICES_MAX 5
@@ -38,19 +39,20 @@
 #define ROT_VEL 200
 
 const struct sLed price_colors[PRICES_MAX + 1] = {
-    { 0,  0,  0},
-    { 0,  0, 10},
-    { 0, 10,  0},
-    {10,  0,  0},
-    {10, 10,  0},
-    {10, 10, 10}
+    { LEDS_MIN, LEDS_MIN, LEDS_MIN },
+    { LEDS_MIN, LEDS_MIN, LEDS_MAX },
+    { LEDS_MIN, LEDS_MAX, LEDS_MIN },
+    { LEDS_MAX, LEDS_MIN, LEDS_MIN },
+    { LEDS_MAX, LEDS_MAX, LEDS_MIN },
+    { LEDS_MAX, LEDS_MAX, LEDS_MAX }
 };
 
 
 
 //*********************************<Macros>*************************************
 #define ONCE(code) do { code } while (0)
-#define mod_float(v,m) ((v - m*(uint32_t)(v/m)))
+#define mod_float(v,m) (((v) - (m)*(uint32_t)((v)/(m))))
+#define angle_rad(v) ((v) * 3.1415 / 180.0)
 
 #define getPriceColor(i) price_colors[i]
 #define getLedColor(i) price_colors[getLedPrice(i)]
@@ -195,22 +197,6 @@ uint8_t getRotationTarget(void)
 
 
 
-//*********************************[init]***************************************
-// initialize program
-void gluecksrad_init (void)
-{
-    leds_init();
-    robolib_init();
-    leds_clearAll();
-
-    if (eeprom_validate()) eeprom_getPrices();
-    else eeprom_setPrices();
-
-    updateTime();
-}
-
-
-
 //*********************************[variables]**********************************
 
 #define STATE_STARTING        0
@@ -219,6 +205,7 @@ void gluecksrad_init (void)
 #define STATE_ROTATE_FINISHED 3
 #define STATE_RESET_PRICES    4
 #define STATE_PRICES_RESETTED 5
+#define STATE_PRICES_EMPTY    6
 
 // current program state
 uint8_t state = STATE_STARTING;
@@ -270,7 +257,7 @@ void animate (void)
             uint8_t led = ((int32_t)(diff * (rot_acc * diff / 2000.0 + ROT_VEL) / 1000.0)) % 20;
             uint8_t i = LEDS_MAX;
 
-            while(i--)
+            while (i--)
             {
                 struct sLed color = getLedColor(i);
                 uint8_t d = (i == led) + 1;
@@ -282,6 +269,9 @@ void animate (void)
                 setState(STATE_ROTATE_FINISHED);
                 prices[rot_target - 1]--;
                 eeprom_setPrices();
+                
+                if (price_sum == 0)
+                    setState(STATE_PRICES_EMPTY);
             }
         }
         break;
@@ -306,7 +296,38 @@ void animate (void)
                 setState(STATE_DEMO);
         }
         break;
+        
+        case STATE_PRICES_EMPTY:
+        {
+            uint8_t i = LEDS_MAX;
+
+            while (i--)
+            {
+                struct sLed color = getLedColor(i);
+                float f = sin(6.283 * diff / 4000.0) / 2.0 + 0.5;
+                leds_set(i, color.r * f, color.g * f, color.b * f);
+            }
+        }
     }
+}
+
+
+
+//*********************************[init]***************************************
+// initialize program
+void gluecksrad_init (void)
+{
+    leds_init();
+    robolib_init();
+    leds_clearAll();
+
+    if (eeprom_validate()) eeprom_getPrices();
+    else eeprom_setPrices();
+    
+    if (price_sum == 0)
+        setState(STATE_PRICES_EMPTY);
+
+    updateTime();
 }
 
 
@@ -326,7 +347,7 @@ int main (void)
 
         if (state == STATE_DEMO && buttons_getBumper())
         {
-            state = STATE_ROTATING;
+            setState(STATE_ROTATING);
             anim_start = time_cur;
             rot_target = getRotationTarget();
             rot_time = (1 + getLedPrice(rot_target) / 13) * (5 + (time_cur % 200) / 150.0);
@@ -348,6 +369,7 @@ int main (void)
                 break;
 
                 case STATE_DEMO:
+                case STATE_PRICES_EMPTY:
                 { 
                     setState(STATE_RESET_PRICES);
                     time_btnMode_start = time_cur;

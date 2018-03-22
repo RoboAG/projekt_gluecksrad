@@ -31,6 +31,7 @@ struct sLed {
 //*********************************<Constants>**********************************
 #define LEDS_COUNT 20
 #define LEDS_MAX 10
+#define LEDS_MIN 0
 
 
 
