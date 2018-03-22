@@ -10,7 +10,7 @@
 *   https://github.com/RoboAG/projekt_gluecksrad                               *
 *******************************************************************************/
 
-
+//TODO: aniomation ROTATION_FINISHED
 
 //*********************************<Included files>*****************************
 #include <math.h>
@@ -267,14 +267,21 @@ void animate (void)
             if (diff + 1 > rot_time && led == rot_target)
             {
                 setState(STATE_ROTATE_FINISHED);
-                prices[rot_target - 1]--;
+                prices[getLedPrice(rot_target) - 1]--;
                 eeprom_setPrices();
-                
-                if (price_sum == 0)
-                    setState(STATE_PRICES_EMPTY);
             }
         }
         break;
+        
+        case STATE_ROTATE_FINISHED:
+        {
+            struct sLed color = getLedColor(rot_target);
+            uint8_t d = 1 + 3 * (diff % 500 < 250);
+            leds_set(rot_target, color.r / d, color.g / d, color.b / d);
+            
+            if (price_sum == 0 && diff > 3000)
+                setState(STATE_PRICES_EMPTY);
+        }
 
         case STATE_RESET_PRICES:
         {
@@ -364,7 +371,10 @@ int main (void)
             {
                 case STATE_ROTATE_FINISHED:
                 {
-                    setState(STATE_DEMO);
+                    if (price_sum)
+                        setState(STATE_DEMO);
+                    else
+                        setState(STATE_PRICES_EMPTY);
                 }
                 break;
 
