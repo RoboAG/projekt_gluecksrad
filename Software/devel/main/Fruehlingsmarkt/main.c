@@ -138,7 +138,7 @@ void eeprom_getPrices (void)
     prices[3] = eeprom_read_uint16(); //12
     prices[4] = eeprom_read_uint16(); //14
 
-    price_sum = prices[1] + prices[2] + prices[3] + prices[4] + prices[5];
+    price_sum = prices[0] + prices[1] + prices[2] + prices[3] + prices[4];
 }
 
 void eeprom_setPrices (void)
@@ -150,7 +150,7 @@ void eeprom_setPrices (void)
     eeprom_write_uint16(prices[3]); //12
     eeprom_write_uint16(prices[4]); //14
 
-    price_sum = prices[1] + prices[2] + prices[3] + prices[4] + prices[5];
+    price_sum = prices[0] + prices[1] + prices[2] + prices[3] + prices[4];
 }
 
 
@@ -164,7 +164,7 @@ uint8_t getRotationTarget(void)
     // choose random price
     uint16_t rand = random();
     uint16_t ran = rand % price_sum;
-    rand/= price_sum;
+    rand /= price_sum;
 
     // get category of random price
     uint8_t cat;
@@ -176,8 +176,8 @@ uint8_t getRotationTarget(void)
     uint8_t i;
     uint8_t count = 0;
     for (i = 0; i < LEDS_MAX; i++)
-{        if (getLedPrice(i) == cat) {count++;}
-    }
+        if (getLedPrice(i) == cat)
+            count++;
 
     count = rand % count;
     for (i = 0; i < LEDS_MAX; i++)
@@ -185,9 +185,7 @@ uint8_t getRotationTarget(void)
         if (getLedPrice(i) == cat)
         {
             if (count == 0)
-            {
                 return i;
-            }
             count--;
         }
     }
@@ -242,7 +240,7 @@ float rot_acc, rot_time, rot_led_start;
 void setState (uint8_t st)
 {
     state = st;
-    anim_start = cur_time;
+    anim_start = time_cur;
 }
 
 
@@ -257,11 +255,11 @@ void animate (void)
     {
         case STATE_DEMO:
         {
-            uint8_t i = LED_MAX;
+            uint8_t i = LEDS_MAX;
             while(i--)
             {
                 struct sLed color = getLedColor(i);
-                uint8_t d = ((time / 1000) + i) % 3 + 1;
+                uint8_t d = ((diff / 1000) + i) % 3 + 1;
                 leds_set(i, color.r / d, color.g / d, color.b / d);
             }
         }
@@ -269,8 +267,8 @@ void animate (void)
 
         case STATE_ROTATING:
         {
-            uint8_t led = ((int)(diff * (rot_acc * diff / 2.0 + ROT_VEL))) % 20;
-            uint8_t i = LED_MAX;
+            uint8_t led = ((int32_t)(diff * (rot_acc * diff / 2000.0 + ROT_VEL) / 1000.0)) % 20;
+            uint8_t i = LEDS_MAX;
 
             while(i--)
             {
@@ -282,7 +280,7 @@ void animate (void)
             if (diff + 1 > rot_time && led == rot_target)
             {
                 setState(STATE_ROTATE_FINISHED);
-                prices[rot_target]--;
+                prices[rot_target - 1]--;
                 eeprom_setPrices();
             }
         }
@@ -293,15 +291,15 @@ void animate (void)
             uint16_t half = EEPROM_RESET_DELAY / 2;
 
             if (diff < half)  // green  -> yellow
-                leds_setAll(LED_MAX * diff / half, 10, 0);
+                leds_setAll(LEDS_MAX * diff / half, 10, 0);
             else  // yellow -> red
-                leds_setAll(LED_MAX, LED_MAX * (2 - diff / half), 0);
+                leds_setAll(LEDS_MAX, LEDS_MAX * (2 - diff / half), 0);
         }
         break;
 
         case STATE_PRICES_RESETTED:
         {
-            leds_setAll(LED_MAX * (diff % 1000 < 500), 0, 0);  // blink red
+            leds_setAll(LEDS_MAX * (diff % 1000 < 500), 0, 0);  // blink red
 
             //break up after 3 seconds
             if (diff >= 3000)
@@ -329,12 +327,12 @@ int main (void)
         if (state == STATE_DEMO && buttons_getBumper())
         {
             state = STATE_ROTATING;
-            anim_start = cur_time;
+            anim_start = time_cur;
             rot_target = getRotationTarget();
-            rot_time = (1 + getLedPrice(rot_target) / 13) * (5 + (cur_time % 200) / 150.0);
+            rot_time = (1 + getLedPrice(rot_target) / 13) * (5 + (time_cur % 200) / 150.0);
             rot_acc = - ROT_VEL / rot_time;
 
-            float led_end = float_mod(rot_time * (rot_acc * rot_time / 2.0 + ROT_VEL), 20.0);
+            float led_end = mod_float(rot_time * (rot_acc * rot_time / 2.0 + ROT_VEL), 20.0);
             if (led_end < rot_target + 0.5) led_end += 20.0;
             rot_led_start = led_end - rot_target + 0.5;
         }
