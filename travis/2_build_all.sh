@@ -108,3 +108,14 @@ echo "# random"
 cd ${PATH_PETER}random/
 robolib_all
 if [ $? -ne 0 ]; then exit -1; fi
+
+
+
+echo ""
+echo "## Main"
+PATH_MAIN="${PATH_DEVEL}main/"
+
+echo "# Fruehlingsmarkt"
+cd ${PATH_MAIN}Fruehlingsmarkt/
+robolib_all
+if [ $? -ne 0 ]; then exit -1; fi
