@@ -78,20 +78,20 @@ if [ $? -ne 0 ]; then exit -1; fi
 
 echo ""
 echo "## Peter"
-PATH_ALEX="${PATH_DEVEL}Peter/"
+PATH_PETER="${PATH_DEVEL}Peter/tests/"
 
-cd ${PATH_ALEX}leds1/
+cd ${PATH_PETER}leds1/
 robolib_all
 if [ $? -ne 0 ]; then exit -1; fi
 
-cd ${PATH_ALEX}leds2/
+cd ${PATH_PETER}leds2/
 robolib_all
 if [ $? -ne 0 ]; then exit -1; fi
 
-cd ${PATH_ALEX}cover/
+cd ${PATH_PETER}cover/
 robolib_all
 if [ $? -ne 0 ]; then exit -1; fi
 
-cd ${PATH_ALEX}random/
+cd ${PATH_PETER}random/
 robolib_all
 if [ $? -ne 0 ]; then exit -1; fi
