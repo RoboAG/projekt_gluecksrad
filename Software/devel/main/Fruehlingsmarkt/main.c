@@ -319,11 +319,11 @@ void animate (void)
                     case 2:
                     case 3:
                     {
-                        int16_t d = diff % 1000 / 100.0, i = LEDS_COUNT;
+                        int16_t d = diff % 1001 / 100.0, i = LEDS_COUNT;
 
                         while (i--)
                         {
-                            if (d >= (rot_target - i + 20) % 20 && (i - rot_target + 20) % 20 <= d)
+                            if (i >= rot_target - d && i <= rot_target + d)
                             {
                                 leds_set(i, color.r, color.g, color.b);
                             }
