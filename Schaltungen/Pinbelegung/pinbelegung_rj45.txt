@@ -1,0 +1,15 @@
+Pinbelegung des RJ45-Anschlusses
+================================
+
+
+Pin      Taster   Programmer  Platine
+(RJ45)   (RJ11)   (AVR ISP)
+1                 1           MISO
+2                 3           SCK
+3        1                    BTN-Mode
+4        2                    BTN-Mode
+5        3        6           Masse
+6        4        6           Masse
+7                 4           MOSI
+8                 5           RESET
+Schirm            2           Vcc
