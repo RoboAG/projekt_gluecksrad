@@ -5,6 +5,7 @@
 * Version: 1.0.0                                                               *
 * Date   : 21.03.18                                                            *
 * Author : Alexander Feilke                                                    *
+* Editor : Richard Knäbchen                                                    *
 *                                                                              *
 * See also:                                                                    *
 *   https://github.com/RoboAG/projekt_gluecksrad                               *
@@ -34,7 +35,7 @@
 #define EEPROM_KEY (0b1010011101100000 + VERSION)
 #define EEPROM_RESET_DELAY 5000
 #define PRICES_MAX 5
-#define PRICES_COUNT {5, 5, 5, 5, 5}
+#define PRICES_COUNT {300, 150, 150, 15, 5}
 
 #define ROT_VEL 80
 
@@ -174,11 +175,10 @@ uint8_t getRotationTarget(void)
     // choose random price
     uint16_t rand = random();
     uint16_t ran = rand % price_sum;
-    rand /= price_sum;
 
     // get category of random price
     uint8_t cat;
-    for (cat = 0; ran > prices[cat] && cat < PRICES_MAX; cat++)
+    for (cat = 0; cat < PRICES_MAX && ran >= prices[cat]; cat++)
         ran -= prices[cat];
     ++cat;
 
@@ -200,8 +200,10 @@ uint8_t getRotationTarget(void)
             count--;
         }
     }
+    
+    //quest failed
 
-    return 5;
+    return 0;
 }
 
 
