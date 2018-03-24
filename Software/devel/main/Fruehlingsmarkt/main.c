@@ -30,12 +30,11 @@
 
 
 //*********************************<Constants>**********************************
-#define VERSION 004
+#define VERSION 008
 #define EEPROM_KEY (0b1010011101100000 + VERSION)
 #define EEPROM_RESET_DELAY 5000
 #define PRICES_MAX 5
-#define PRICES_COUNT {5,5,5,5,5}
-//{300, 150, 150, 15, 5}
+#define PRICES_COUNT {300, 150, 150, 15, 5}
 
 #define ROT_VEL 80
 
@@ -79,6 +78,12 @@ int  main (void);
 
 
 float abs_float(float v)
+{
+    if(v > 0) return v;
+    else return -v;
+}
+
+float abs_int16(int16_t v)
 {
     if(v > 0) return v;
     else return -v;
@@ -305,18 +310,30 @@ void animate (void)
             {
                 case 0:
                 {
-                    float f = diff / 1000.0;
-                    leds_setAll((uint8_t)(color.r * f), (uint8_t)(color.g * f), (uint8_t)(color.b * f));
+                    float abs = abs_float((diff % 1000) / 500.0 - 1);
+                    uint8_t
+                        f = 10 - 10 * abs,
+                        g = 2 * abs,
+                        i = LEDS_COUNT;
+
+                    while(i--)
+                    {
+                        struct sLed led_color = getLedColor(i);
+                        leds_set(i,
+                            (color.r * f + led_color.r * g) / 20,
+                            (color.g * f + led_color.g * g) / 20,
+                            (color.b * f + led_color.b * g) / 20
+                        );
+                    }
                 }
                 break;
 
                 case 1:
                 case 2:
                 {
-                    int32_t i, d = (diff % 1001) / 50.0;
-                    uint8_t target = rot_target + (d > 10) * 10;
-                    
-                    for(i = target - d; i < target + d; i++)
+                    int32_t i, d = round((diff % 1001) / 50.0);
+
+                    for(i = rot_target - d % 10; i <= rot_target + d % 10; i++)
                     {
                         if (d > 10) color = getLedColor((i + 800) % 20);
                         leds_set((i + 800) % 20, color.r, color.g, color.b);
@@ -333,7 +350,7 @@ void animate (void)
                     while(i--)
                     {
                         struct sLed led_color = getLedColor(i);
-                        
+
                         if ((sec - i + 40) % 4)
                             leds_set(i, led_color.r / 5, led_color.g / 5, led_color.b / 5);
                         else
