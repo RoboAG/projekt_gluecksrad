@@ -57,18 +57,18 @@ const struct sLed price_colors[PRICES_COUNT] = {
 
 
 //*********************************<Prototypes>*********************************
-void test(uint8_t i);
+void test (uint8_t i);
 
-uint8_t getLedPrice(uint8_t i);
+uint8_t getLedPrice (uint8_t i);
 
-void updateTime(void);
+void updateTime (void);
 
-void eeprom_save_key(void);
+void eeprom_save_key (void);
 int  eeprom_validate (void);
 void eeprom_getPrices (void);
 void eeprom_setPrices (void);
 
-uint8_t getRotationTarget(void);
+uint8_t getRotationTarget (void);
 
 void gluecksrad_init (void);
 void animate (void);
@@ -255,7 +255,7 @@ void animate (void)
             uint8_t i = LEDS_COUNT;
             uint16_t sec = diff / 1000;
 
-            while(i--)
+            while (i--)
             {
                 struct sLed color = getLedColor(i);
                 if ((sec - i + 40) % 4)
@@ -306,16 +306,16 @@ void animate (void)
                     float abs = abs_float((diff % 1000) / 500.0 - 1);
                     uint8_t
                         f = 10 - 10 * abs,
-                        g = 2 * abs,
+                        g = 7 * abs,
                         i = LEDS_COUNT;
                     
-                    while(i--)
+                    while (i--)
                     {
                         struct sLed led_color = getLedColor(i);
                         leds_set(i,
                             (color.r * f + led_color.r * g) / 20,
                             (color.g * f + led_color.g * g) / 20,
-                            (color.b * f + led_color.b * g) / 20
+                            (color.b * f + led_color.b * g / 2) / 20
                         );
                     }
                 }
@@ -340,7 +340,7 @@ void animate (void)
                     uint8_t i = LEDS_COUNT;
                     uint16_t sec = diff / 50;
 
-                    while(i--)
+                    while (i--)
                     {
                         struct sLed led_color = getLedColor(i);
                         
