@@ -30,7 +30,7 @@
 
 
 //*********************************<Constants>**********************************
-#define VERSION 9
+#define VERSION 10
 #define EEPROM_KEY (0b1010011101100000 + VERSION)
 #define EEPROM_RESET_DELAY 5000
 #define PRICES_COUNT 5
@@ -180,26 +180,23 @@ uint8_t getRotationTarget (void)
     if (price_sum <= 0) return 0;
 
     // choose random price
-    uint16_t num = random(), ran = num % price_sum;
+    uint16_t i, num = random(), ran = num % price_sum;
     uint8_t cat;
 
     // select category dependent on the probability
     for (cat = 0; cat < PRICES_COUNT && ran >= prices[cat]; cat++)
         ran -= prices[cat];
-    
-    //printf("%4i %6i %3i %2i\n", price_sum, num, ran, cat);
-    
+
     #define TARGET_STEP 3
-    uint16_t i;
     num = LEDS_COUNT * TARGET_STEP + num % 20;
-    
-    for (i = 0; i < num; i += TARGET_STEP)
+
+    for (i = num % 20; i < num; i += TARGET_STEP)
         if (getLedPrice(i % 20) == cat)
             return i % 20;
-    
+
     //leds_setAll(1,1,0);
     //delay_ms(100);
-    return 1;
+    return 0;
 }
 
 
@@ -308,14 +305,14 @@ void animate (void)
                         f = 10 - 10 * abs,
                         g = 7 * abs,
                         i = LEDS_COUNT;
-                    
+
                     while (i--)
                     {
                         struct sLed led_color = getLedColor(i);
                         leds_set(i,
-                            (color.r * f + led_color.r * g) / 20,
-                            (color.g * f + led_color.g * g) / 20,
-                            (color.b * f + led_color.b * g / 2) / 20
+                            (color.r * f     + led_color.r * g) / 20,
+                            (color.g * f     + led_color.g * g) / 20,
+                            (color.b * f * 2 + led_color.b * g) / 40
                         );
                     }
                 }
@@ -343,7 +340,7 @@ void animate (void)
                     while (i--)
                     {
                         struct sLed led_color = getLedColor(i);
-                        
+
                         if ((sec - i + 40) % 4)
                             leds_set(i, led_color.r / 5, led_color.g / 5, led_color.b / 5);
                         else
@@ -433,9 +430,9 @@ void gluecksrad_init (void)
     if (eeprom_validate())
     {
         eeprom_getPrices();
-        if (price_sum <= 0) 
+        if (price_sum <= 0)
             setState(STATE_PRICES_EMPTY);
-        else 
+        else
             setState(STATE_DEMO);
     }
     else
@@ -479,7 +476,7 @@ int main (void)
                     rot_target_abs = rounds * 20 + rot_target;
                     rot_acc = - ROT_VEL * ROT_VEL / (float)(2 * (rot_target_abs) + 1);
                     rot_time = 1000.0 * abs_float(ROT_VEL / rot_acc);
-                } 
+                }
                 else setState(STATE_PRICES_EMPTY);
             }
         }
@@ -518,7 +515,7 @@ int main (void)
         else  // btnMode not pressed
         {
             if (time_btnMode_start) time_btnMode_start = 0;
-            
+
             switch (state)
             {
                 case STATE_RESET_PRICES:
