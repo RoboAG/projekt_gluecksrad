@@ -30,7 +30,7 @@
 
 
 //*********************************<Constants>**********************************
-#define VERSION 008
+#define VERSION 8
 #define EEPROM_KEY (0b1010011101100000 + VERSION)
 #define EEPROM_RESET_DELAY 5000
 #define PRICES_MAX 5
@@ -94,7 +94,7 @@ float abs_int16(int16_t v)
 //*********************************[getLedPrice]********************************
 uint8_t getLedPrice(uint8_t i)
 {
-    if (i        %       2) return 0; // 1, 3, 5, ..., 19 (50%)
+    if (i        % 2 ==  1) return 0; // 1, 3, 5, ..., 19 (50%)
     if ((i % 10) % 6 ==  0) return 1; // 0, 6, 10, 16     (20%)
     if ((i % 10) % 4 ==  0) return 2; // 4, 8, 14, 18     (20%)
     if (i            == 12) return 3; // 12               ( 5%)
@@ -375,6 +375,7 @@ void animate (void)
             if (time_cur - time_btnMode_start >= EEPROM_RESET_DELAY)
             {
                 setState(STATE_PRICES_RESETTED);
+                time_btnMode_start = 0;
 
                 //reset eeprom
                 uint16_t _prices[PRICES_MAX] = PRICES_COUNT;
@@ -495,8 +496,10 @@ int main (void)
                 case STATE_DEMO:
                 case STATE_PRICES_EMPTY:
                 {
-                    setState(STATE_RESET_PRICES);
-                    time_btnMode_start = time_cur;
+                    if(time_btnMode_start && time_cur - time_btnMode_start > 1000)
+                        setState(STATE_RESET_PRICES);
+                    else
+                        time_btnMode_start = time_cur;
                 }
                 break;
 
