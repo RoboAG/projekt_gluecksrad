@@ -77,5 +77,5 @@ uint16_t random() {
     result.h = TCNT1H;
     SREG = mSREG;
 
-    return (result.u << 4) + (result.u >> 4) + 0xf7412e;
+    return (result.u << 11) - (result.u << 4) + (result.u >> 4) + 0x3f7412e;
 }
