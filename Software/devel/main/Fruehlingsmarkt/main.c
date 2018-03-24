@@ -180,11 +180,11 @@ uint8_t getRotationTarget (void)
     if (price_sum <= 0) return 0;
 
     // choose random price
-    uint16_t num = random(), ran = (num % price_sum) + 1;
+    uint16_t num = random(), ran = num % price_sum;
     uint8_t cat;
 
     // select category dependent on the probability
-    for (cat = 0; ran > prices[cat] && cat < PRICES_COUNT; cat++)
+    for (cat = 0; cat < PRICES_COUNT && ran >= prices[cat]; cat++)
         ran -= prices[cat];
     
     //printf("%4i %6i %3i %2i\n", price_sum, num, ran, cat);
