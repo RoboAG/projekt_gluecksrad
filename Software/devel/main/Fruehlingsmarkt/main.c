@@ -30,15 +30,15 @@
 
 
 //*********************************<Constants>**********************************
-#define VERSION 8
+#define VERSION 9
 #define EEPROM_KEY (0b1010011101100000 + VERSION)
 #define EEPROM_RESET_DELAY 5000
-#define PRICES_MAX 5
-#define PRICES_COUNT {300, 150, 150, 15, 5}
+#define PRICES_COUNT 5
+#define PRICES_MAX {300, 150, 150, 15, 5}
 
 #define ROT_VEL 80
 
-const struct sLed price_colors[PRICES_MAX + 1] = {
+const struct sLed price_colors[PRICES_COUNT] = {
     { LEDS_MIN, LEDS_MIN, LEDS_MAX },
     { LEDS_MIN, LEDS_MAX, LEDS_MIN },
     { LEDS_MAX, LEDS_MIN, LEDS_MIN },
@@ -50,7 +50,6 @@ const struct sLed price_colors[PRICES_MAX + 1] = {
 
 //*********************************<Macros>*************************************
 #define ONCE(code) do { code } while (0)
-#define mod_float(v,m) (((v) - (m)*(uint32_t)((v)/(m))))
 #define angle_rad(v) ((v) * 3.1415 / 180.0)
 
 #define getPriceColor(i) price_colors[i]
@@ -77,22 +76,27 @@ int  main (void);
 
 
 
-float abs_float(float v)
+float mod_float (float v, float m)
 {
-    if(v > 0) return v;
+    return v - m * (int32_t)(v / m);
+}
+
+float abs_float (float v)
+{
+    if (v > 0) return v;
     else return -v;
 }
 
-float abs_int16(int16_t v)
+float abs_int16 (int16_t v)
 {
-    if(v > 0) return v;
+    if (v > 0) return v;
     else return -v;
 }
 
 
 
 //*********************************[getLedPrice]********************************
-uint8_t getLedPrice(uint8_t i)
+uint8_t getLedPrice (uint8_t i)
 {
     if (i        % 2 ==  1) return 0; // 1, 3, 5, ..., 19 (50%)
     if ((i % 10) % 6 ==  0) return 1; // 0, 6, 10, 16     (20%)
@@ -119,10 +123,10 @@ void updateTime (void)
 
 //*********************************[eeprom]*************************************
 //array of maximum amounts of prices
-uint16_t prices[PRICES_MAX] = PRICES_COUNT;
+int16_t prices[PRICES_COUNT] = PRICES_MAX;
 
 //sum of available prices
-uint16_t price_sum = 620;
+int16_t price_sum = 620;
 
 
 //use a specific key to check whether the eeprom
@@ -135,7 +139,7 @@ int eeprom_validate (void)
         eeprom_read_uint16() == EEPROM_KEY;   // 4
 }
 
-void eeprom_save_key(void)
+void eeprom_save_key (void)
 {
     eeprom_adress_set(0);            // 0
     eeprom_write_uint16(EEPROM_KEY); // 2
@@ -145,24 +149,24 @@ void eeprom_save_key(void)
 //read and write prices
 void eeprom_getPrices (void)
 {
-    eeprom_adress_set(4);             // 4
-    prices[0] = eeprom_read_uint16(); // 6
-    prices[1] = eeprom_read_uint16(); // 8
-    prices[2] = eeprom_read_uint16(); //10
-    prices[3] = eeprom_read_uint16(); //12
-    prices[4] = eeprom_read_uint16(); //14
+    eeprom_adress_set(4);                      // 4
+    prices[0] = (int16_t)eeprom_read_uint16(); // 6
+    prices[1] = (int16_t)eeprom_read_uint16(); // 8
+    prices[2] = (int16_t)eeprom_read_uint16(); //10
+    prices[3] = (int16_t)eeprom_read_uint16(); //12
+    prices[4] = (int16_t)eeprom_read_uint16(); //14
 
     price_sum = prices[0] + prices[1] + prices[2] + prices[3] + prices[4];
 }
 
 void eeprom_setPrices (void)
 {
-    eeprom_adress_set(4);           // 4
-    eeprom_write_uint16(prices[0]); // 6
-    eeprom_write_uint16(prices[1]); // 8
-    eeprom_write_uint16(prices[2]); //10
-    eeprom_write_uint16(prices[3]); //12
-    eeprom_write_uint16(prices[4]); //14
+    eeprom_adress_set(4);                     // 4
+    eeprom_write_uint16((uint16_t)prices[0]); // 6
+    eeprom_write_uint16((uint16_t)prices[1]); // 8
+    eeprom_write_uint16((uint16_t)prices[2]); //10
+    eeprom_write_uint16((uint16_t)prices[3]); //12
+    eeprom_write_uint16((uint16_t)prices[4]); //14
 
     price_sum = prices[0] + prices[1] + prices[2] + prices[3] + prices[4];
 }
@@ -171,40 +175,31 @@ void eeprom_setPrices (void)
 
 //*********************************[random]*************************************
 
-uint8_t getRotationTarget(void)
+uint8_t getRotationTarget (void)
 {
-    if (!price_sum) return 0;
+    if (price_sum <= 0) return 0;
 
     // choose random price
-    uint16_t rand = random();
-    uint16_t ran = rand % price_sum;
-    rand /= price_sum;
-
-    // get category of random price
+    uint16_t num = random(), ran = (num % price_sum) + 1;
     uint8_t cat;
-    for (cat = 0; ran > prices[cat] && cat < PRICES_MAX; cat++)
+
+    // select category dependent on the probability
+    for (cat = 0; ran > prices[cat] && cat < PRICES_COUNT; cat++)
         ran -= prices[cat];
-
-
-    // select field of category
-    uint8_t i;
-    uint8_t count = 0;
-    for (i = 0; i < LEDS_COUNT; i++)
-        if (getLedPrice(i) == cat)
-            count++;
-
-    count = rand % count;
-    for (i = 0; i < LEDS_COUNT; i++)
-    {
-        if (getLedPrice(i) == cat)
-        {
-            if (count == 0)
-                return i;
-            count--;
-        }
-    }
-
-    return 0;
+    
+    //printf("%4i %6i %3i %2i\n", price_sum, num, ran, cat);
+    
+    #define TARGET_STEP 3
+    uint16_t i;
+    num = LEDS_COUNT * TARGET_STEP + num % 20;
+    
+    for (i = 0; i < num; i += TARGET_STEP)
+        if (getLedPrice(i % 20) == cat)
+            return i % 20;
+    
+    //leds_setAll(1,1,0);
+    //delay_ms(100);
+    return 1;
 }
 
 
@@ -264,9 +259,7 @@ void animate (void)
             {
                 struct sLed color = getLedColor(i);
                 if ((sec - i + 40) % 4)
-                {
                     leds_set(i, color.r / 5, color.g / 5, color.b / 5);
-                }
                 else
                 {
                     float f = 1 + 0.3 * (diff % 2000 < 1000) - abs_float((diff % 1000) / 500.0 - 1);
@@ -315,7 +308,7 @@ void animate (void)
                         f = 10 - 10 * abs,
                         g = 2 * abs,
                         i = LEDS_COUNT;
-
+                    
                     while(i--)
                     {
                         struct sLed led_color = getLedColor(i);
@@ -333,7 +326,7 @@ void animate (void)
                 {
                     int32_t i, d = round((diff % 1001) / 50.0);
 
-                    for(i = rot_target - d % 10; i <= rot_target + d % 10; i++)
+                    for (i = rot_target - d % 10; i <= rot_target + d % 10; i++)
                     {
                         if (d > 10) color = getLedColor((i + 800) % 20);
                         leds_set((i + 800) % 20, color.r, color.g, color.b);
@@ -350,7 +343,7 @@ void animate (void)
                     while(i--)
                     {
                         struct sLed led_color = getLedColor(i);
-
+                        
                         if ((sec - i + 40) % 4)
                             leds_set(i, led_color.r / 5, led_color.g / 5, led_color.b / 5);
                         else
@@ -375,10 +368,9 @@ void animate (void)
             if (time_cur - time_btnMode_start >= EEPROM_RESET_DELAY)
             {
                 setState(STATE_PRICES_RESETTED);
-                time_btnMode_start = 0;
 
                 //reset eeprom
-                uint16_t _prices[PRICES_MAX] = PRICES_COUNT;
+                uint16_t _prices[PRICES_COUNT] = PRICES_MAX;
                 prices[0] = _prices[0];
                 prices[1] = _prices[1];
                 prices[2] = _prices[2];
@@ -410,6 +402,7 @@ void animate (void)
                 leds_set(i, color.r * f, color.g * f, color.b * f);
             }
         }
+        break;
 
         case STATE_EEPROM_INVALID:
         {
@@ -421,6 +414,7 @@ void animate (void)
                 leds_set(i, d, 0, 0);
             }
         }
+        break;
     }
 }
 
@@ -439,10 +433,13 @@ void gluecksrad_init (void)
     if (eeprom_validate())
     {
         eeprom_getPrices();
-        if (price_sum == 0) { setState(STATE_PRICES_EMPTY);}
-        else { setState(STATE_DEMO); }
+        if (price_sum <= 0) 
+            setState(STATE_PRICES_EMPTY);
+        else 
+            setState(STATE_DEMO);
     }
-    else { setState(STATE_EEPROM_INVALID); }
+    else
+        setState(STATE_EEPROM_INVALID);
 
     updateTime();
 }
@@ -450,7 +447,7 @@ void gluecksrad_init (void)
 
 
 //************************************[test]************************************
-void test(uint8_t i)
+void test (uint8_t i)
 {
     leds_set(i,10,10,10);
     systick_delay(500);
@@ -473,13 +470,17 @@ int main (void)
         {
             if (state == STATE_DEMO)
             {
-                setState(STATE_ROTATING);
-                rot_target = getRotationTarget();
+                if (price_sum > 0)
+                {
+                    setState(STATE_ROTATING);
+                    rot_target = getRotationTarget();
 
-                uint16_t rounds = 2 * (14 + getLedPrice(rot_target)) * (15 + (time_cur % 5)) / 39;
-                rot_target_abs = rounds * 20 + rot_target;
-                rot_acc = - ROT_VEL * ROT_VEL / (float)(2 * (rot_target_abs) + 1);
-                rot_time = 1000.0 * abs_float(ROT_VEL / rot_acc);
+                    uint16_t rounds = 2 * (14 + getLedPrice(rot_target)) * (15 + (time_cur % 5)) / 39;
+                    rot_target_abs = rounds * 20 + rot_target;
+                    rot_acc = - ROT_VEL * ROT_VEL / (float)(2 * (rot_target_abs) + 1);
+                    rot_time = 1000.0 * abs_float(ROT_VEL / rot_acc);
+                } 
+                else setState(STATE_PRICES_EMPTY);
             }
         }
 
@@ -496,8 +497,11 @@ int main (void)
                 case STATE_DEMO:
                 case STATE_PRICES_EMPTY:
                 {
-                    if(time_btnMode_start && time_cur - time_btnMode_start > 1000)
-                        setState(STATE_RESET_PRICES);
+                    if (time_btnMode_start)
+                    {
+                        if (time_cur - time_btnMode_start > 1000)
+                            setState(STATE_RESET_PRICES);
+                    }
                     else
                         time_btnMode_start = time_cur;
                 }
@@ -513,18 +517,22 @@ int main (void)
         }
         else  // btnMode not pressed
         {
+            if (time_btnMode_start) time_btnMode_start = 0;
+            
             switch (state)
             {
                 case STATE_RESET_PRICES:
                 {
-                    setState(STATE_DEMO);
-                    time_btnMode_start = 0;
+                    if (price_sum > 0)
+                        setState(STATE_DEMO);
+                    else
+                        setState(STATE_PRICES_EMPTY);
                 }
                 break;
 
                 case STATE_ROTATE_FINISHED:
                 {
-                    if (price_sum)
+                    if (price_sum > 0)
                         setState(STATE_DEMO);
                     else
                         setState(STATE_PRICES_EMPTY);
