@@ -10,8 +10,6 @@
 *   https://github.com/RoboAG/projekt_gluecksrad                               *
 *******************************************************************************/
 
-//TODO: aniomation ROTATION_FINISHED
-
 //*********************************<Included files>*****************************
 #include <math.h>
 #include <avr/io.h>
@@ -76,6 +74,29 @@ int  main (void);
 
 
 
+//*********************************<Flags>**************************************
+#define MODE_DEFAULT          1
+#define MODE_LENZ             2
+
+#define STATE_STARTING        0
+#define STATE_DEMO            1
+#define STATE_ROTATING        2
+#define STATE_ROTATE_FINISH   3
+#define STATE_ROTATE_FINISHED 4
+#define STATE_RESET_PRICES    5
+#define STATE_PRICES_RESETTED 6
+#define STATE_PRICES_EMPTY    7
+#define STATE_EEPROM_INVALID  8
+
+// wheel mode
+uint8_t mode = MODE_DEFAULT;
+
+// current program state
+uint8_t state = STATE_STARTING;
+
+
+
+//*********************************<Math>***************************************
 float mod_float (float v, float m)
 {
     return v - m * (int32_t)(v / m);
@@ -83,14 +104,18 @@ float mod_float (float v, float m)
 
 float abs_float (float v)
 {
-    if (v > 0) return v;
-    else return -v;
+    if (v > 0)
+        return v;
+    else
+       return -v;
 }
 
 float abs_int16 (int16_t v)
 {
-    if (v > 0) return v;
-    else return -v;
+    if (v > 0)
+        return v;
+    else
+        return -v;
 }
 
 
@@ -149,24 +174,30 @@ void eeprom_save_key (void)
 //read and write prices
 void eeprom_getPrices (void)
 {
-    eeprom_adress_set(4);                      // 4
-    prices[0] = (int16_t)eeprom_read_uint16(); // 6
-    prices[1] = (int16_t)eeprom_read_uint16(); // 8
-    prices[2] = (int16_t)eeprom_read_uint16(); //10
-    prices[3] = (int16_t)eeprom_read_uint16(); //12
-    prices[4] = (int16_t)eeprom_read_uint16(); //14
+    if (mode == MODE_LENZ)
+    {
+        eeprom_adress_set(4);                      // 4
+        prices[0] = (int16_t)eeprom_read_uint16(); // 6
+        prices[1] = (int16_t)eeprom_read_uint16(); // 8
+        prices[2] = (int16_t)eeprom_read_uint16(); //10
+        prices[3] = (int16_t)eeprom_read_uint16(); //12
+        prices[4] = (int16_t)eeprom_read_uint16(); //14
+    }
 
     price_sum = prices[0] + prices[1] + prices[2] + prices[3] + prices[4];
 }
 
 void eeprom_setPrices (void)
 {
-    eeprom_adress_set(4);                     // 4
-    eeprom_write_uint16((uint16_t)prices[0]); // 6
-    eeprom_write_uint16((uint16_t)prices[1]); // 8
-    eeprom_write_uint16((uint16_t)prices[2]); //10
-    eeprom_write_uint16((uint16_t)prices[3]); //12
-    eeprom_write_uint16((uint16_t)prices[4]); //14
+    if (mode == MODE_LENZ)
+    {
+        eeprom_adress_set(4);                     // 4
+        eeprom_write_uint16((uint16_t)prices[0]); // 6
+        eeprom_write_uint16((uint16_t)prices[1]); // 8
+        eeprom_write_uint16((uint16_t)prices[2]); //10
+        eeprom_write_uint16((uint16_t)prices[3]); //12
+        eeprom_write_uint16((uint16_t)prices[4]); //14
+    }
 
     price_sum = prices[0] + prices[1] + prices[2] + prices[3] + prices[4];
 }
@@ -203,19 +234,6 @@ uint8_t getRotationTarget (void)
 
 //*********************************[variables]**********************************
 
-#define STATE_STARTING        0
-#define STATE_DEMO            1
-#define STATE_ROTATING        2
-#define STATE_ROTATE_FINISH   3
-#define STATE_ROTATE_FINISHED 4
-#define STATE_RESET_PRICES    5
-#define STATE_PRICES_RESETTED 6
-#define STATE_PRICES_EMPTY    7
-#define STATE_EEPROM_INVALID  8
-
-// current program state
-uint8_t state = STATE_STARTING;
-
 // time when btnMode press started
 uint32_t time_btnMode_start = 0;
 
@@ -235,6 +253,14 @@ void setState (uint8_t st)
 {
     state = st;
     anim_start = time_cur;
+}
+
+
+
+//*********************************[setMode]***********************************
+void setMode (uint8_t md)
+{
+    mode = md;
 }
 
 
@@ -281,8 +307,11 @@ void animate (void)
 
             if (diff >= rot_time || led >= rot_target_abs)
             {
-                prices[getLedPrice(rot_target)]--;
-                eeprom_setPrices();
+                if (mode == MODE_LENZ)
+                {
+                    prices[getLedPrice(rot_target)]--;
+                    eeprom_setPrices();
+                }
 
                 systick_delay(500);
                 updateTime();
@@ -373,7 +402,9 @@ void animate (void)
                 prices[2] = _prices[2];
                 prices[3] = _prices[3];
                 prices[4] = _prices[4];
-                eeprom_setPrices();
+
+                if (mode == MODE_LENZ)
+                    eeprom_setPrices();
             }
         }
         break;
@@ -427,27 +458,34 @@ void gluecksrad_init (void)
     systick_init();
     random_init();
 
-    if (eeprom_validate())
+
+
+    // select mode
+    if (buttons_getMode())
     {
-        eeprom_getPrices();
-        if (price_sum <= 0)
-            setState(STATE_PRICES_EMPTY);
+        setMode(MODE_LENZ);
+        if (eeprom_validate())
+        {
+            eeprom_getPrices();
+            if (price_sum <= 0)
+                setState(STATE_PRICES_EMPTY);
+            else
+                setState(STATE_DEMO);
+        }
         else
-            setState(STATE_DEMO);
+            setState(STATE_EEPROM_INVALID);
+
+        leds_setAll(LEDS_MAX, LEDS_MAX, LEDS_MAX);
+        systick_delay(1000);
     }
     else
-        setState(STATE_EEPROM_INVALID);
+    {
+        price_sum = prices[0] + prices[1] + prices[2] + prices[3] + prices[4];
+        setState(STATE_DEMO);
+        setMode(MODE_DEFAULT);
+    }
 
     updateTime();
-}
-
-
-
-//************************************[test]************************************
-void test (uint8_t i)
-{
-    leds_set(i,10,10,10);
-    systick_delay(500);
 }
 
 
@@ -457,6 +495,7 @@ int main (void)
 {
     // initialize
     gluecksrad_init();
+
 
     // main loop
     while (1)
@@ -469,15 +508,17 @@ int main (void)
             {
                 if (price_sum > 0)
                 {
-                    setState(STATE_ROTATING);
                     rot_target = getRotationTarget();
 
                     uint16_t rounds = 2 * (14 + getLedPrice(rot_target)) * (15 + (time_cur % 5)) / 39;
                     rot_target_abs = rounds * 20 + rot_target;
                     rot_acc = - ROT_VEL * ROT_VEL / (float)(2 * (rot_target_abs) + 1);
                     rot_time = 1000.0 * abs_float(ROT_VEL / rot_acc);
+
+                    setState(STATE_ROTATING);
                 }
-                else setState(STATE_PRICES_EMPTY);
+                else
+                    setState(STATE_PRICES_EMPTY);
             }
         }
 
@@ -514,7 +555,8 @@ int main (void)
         }
         else  // btnMode not pressed
         {
-            if (time_btnMode_start) time_btnMode_start = 0;
+            if (time_btnMode_start)
+                time_btnMode_start = 0;
 
             switch (state)
             {
