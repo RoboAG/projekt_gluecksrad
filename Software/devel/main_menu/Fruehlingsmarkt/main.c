@@ -10,6 +10,8 @@
 *   https://github.com/RoboAG/projekt_gluecksrad                               *
 *******************************************************************************/
 
+
+
 //*********************************<Included files>*****************************
 #include <math.h>
 #include <avr/io.h>
@@ -27,14 +29,59 @@
 
 
 
+//*********************************<Flags>**************************************
+#define MODE_DEFAULT          1
+#define MODE_LENZ             2
+
+#define STATE_STARTING        0
+#define STATE_DEMO            1
+#define STATE_ROTATING        2
+#define STATE_ROTATE_FINISH   3
+#define STATE_ROTATE_FINISHED 4
+#define STATE_MENU_STARTING   5
+#define STATE_MENU            6
+#define STATE_MENU_NEXT       7
+#define STATE_MENU_SELECT     8
+#define STATE_MENU_SELECTED   9
+#define STATE_RESET_PRICES    10
+#define STATE_PRICES_EMPTY    11
+#define STATE_EEPROM_INVALID  12
+
+#define MENU_EXIT             0
+#define MENU_MODE_DEFAULT     1
+#define MENU_MODE_LENZ        2
+#define MENU_EEPROM_RESET     3
+#define MENU_COUNT            4
+
+// wheel mode
+uint8_t mode = MODE_DEFAULT;
+
+// program state
+uint8_t state = STATE_STARTING;
+
+// menu state
+uint8_t menu = MENU_RESET;
+
+
+
 //*********************************<Constants>**********************************
 #define VERSION 10
 #define EEPROM_KEY (0b1010011101100000 + VERSION)
-#define EEPROM_RESET_DELAY 5000
 #define PRICES_COUNT 5
-#define PRICES_MAX {300, 150, 150, 15, 5}
-
+#define PRICES_MAX { 300, 150, 150, 15, 5 }
 #define ROT_VEL 80
+
+#define EEPROM_RESET_DELAY 5000
+#define MENU_START_DELAY   3000
+#define MENU_SELECT_DELAY  3000
+
+
+const struct sLed menu_colors[PRICES_COUNT] = {
+    { LEDS_MIN, LEDS_MIN, LEDS_MAX },
+    { LEDS_MIN, LEDS_MAX, LEDS_MIN },
+    { LEDS_MAX, LEDS_MAX, LEDS_MIN },
+    { LEDS_MAX, LEDS_MIN, LEDS_MIN }
+};
 
 const struct sLed price_colors[PRICES_COUNT] = {
     { LEDS_MIN, LEDS_MIN, LEDS_MAX },
@@ -50,49 +97,48 @@ const struct sLed price_colors[PRICES_COUNT] = {
 #define ONCE(code) do { code } while (0)
 #define angle_rad(v) ((v) * 3.1415 / 180.0)
 
+#define eeprom_read_uint8 eeprom_read
+#define eeprom_write_uint8 eeprom_write
+
 #define getPriceColor(i) price_colors[i]
 #define getLedColor(i) price_colors[getLedPrice(i)]
 
+#define getMenuColor(i) menu_colors[i]
+#define getLedMenu(i) ((i)*MENU_COUNT/LEDS_COUNT)
+#define getLedMenuColor(i) menu_colors[getLedMenu(i)]
+
+
 
 //*********************************<Prototypes>*********************************
-void test (uint8_t i);
 
-uint8_t getLedPrice (uint8_t i);
+float   mod_float              (float v, float m);
+float   abs_float              (float v);
+float   abs_int16              (int16_t v);
 
-void updateTime (void);
+uint8_t getLedPrice            (uint8_t i);
 
-void eeprom_save_key (void);
-int  eeprom_validate (void);
-void eeprom_getPrices (void);
-void eeprom_setPrices (void);
+void    updateTime             (void);
 
-uint8_t getRotationTarget (void);
+void    eeprom_save_key        (void);
+int     eeprom_validate        (void);
+void    eeprom_getPrices       (void);
+void    eeprom_setPrices       (void);
+uint8_t eeprom_getMode         (void);
+void    eeprom_setMode         (uint8_t md);
 
-void gluecksrad_init (void);
-void animate (void);
-int  main (void);
+void    setMode                (uint8_t md);
+void    setState               (uint8_t st);
 
+void    gluecksrad_init        (void);
+void    animate                (void);
+uint8_t getRotationTarget      (void);
 
+void    handleBumperPressed    (void);
+void    handleBumperNotPressed (void);
+void    handleModePressed      (void);
+void    handleModeNotPressed   (void);
 
-//*********************************<Flags>**************************************
-#define MODE_DEFAULT          1
-#define MODE_LENZ             2
-
-#define STATE_STARTING        0
-#define STATE_DEMO            1
-#define STATE_ROTATING        2
-#define STATE_ROTATE_FINISH   3
-#define STATE_ROTATE_FINISHED 4
-#define STATE_RESET_PRICES    5
-#define STATE_PRICES_RESETTED 6
-#define STATE_PRICES_EMPTY    7
-#define STATE_EEPROM_INVALID  8
-
-// wheel mode
-uint8_t mode = MODE_DEFAULT;
-
-// current program state
-uint8_t state = STATE_STARTING;
+int     main                   (void);
 
 
 
@@ -203,31 +249,17 @@ void eeprom_setPrices (void)
 }
 
 
-
-//*********************************[random]*************************************
-
-uint8_t getRotationTarget (void)
+//read and write mode
+uint8_t eeprom_getMode (void)
 {
-    if (price_sum <= 0) return 0;
+    eeprom_adress_set(14);               //14
+    return (uint8_t)eeprom_read_uint8(); //15
+}
 
-    // choose random price
-    uint16_t i, num = random(), ran = num % price_sum;
-    uint8_t cat;
-
-    // select category dependent on the probability
-    for (cat = 0; cat < PRICES_COUNT && ran >= prices[cat]; cat++)
-        ran -= prices[cat];
-
-    #define TARGET_STEP 3
-    num = LEDS_COUNT * TARGET_STEP + num % 20;
-
-    for (i = num % 20; i < num; i += TARGET_STEP)
-        if (getLedPrice(i % 20) == cat)
-            return i % 20;
-
-    //leds_setAll(1,1,0);
-    //delay_ms(100);
-    return 0;
+void eeprom_setMode (uint8_t md)
+{
+    eeprom_adress_set(14);           //14
+    eeprom_write_uint8((uint8_t)md); //15
 }
 
 
@@ -237,14 +269,60 @@ uint8_t getRotationTarget (void)
 // time when btnMode press started
 uint32_t time_btnMode_start = 0;
 
+// time when btnBumper press started
+uint32_t time_btnBumper_start = 0;
+
 // time when animation started
-uint32_t anim_start;
+uint32_t time_anim_start;
 
 // rotation target
-uint16_t rot_target_abs;
-uint8_t  rot_target;
+uint16_t rot_target_abs; // absolute target including rounds
+uint8_t  rot_target;     // target led (0-20]
 
-float rot_acc, rot_time, rot_led_start;
+// rotation acceleration and time
+float rot_acc, rot_time;
+
+
+
+//*********************************[setState]***********************************
+void setMode (uint8_t md)
+{
+    mode = md;
+    eeprom_setMode(mode);
+
+    switch (mode)
+    {
+        case MODE_DEFAULT:
+        {
+            //reset price array
+            uint16_t _prices[PRICES_COUNT] = PRICES_MAX;
+            prices[0] = _prices[0];
+            prices[1] = _prices[1];
+            prices[2] = _prices[2];
+            prices[3] = _prices[3];
+            prices[4] = _prices[4];
+
+            price_sum = prices[0] + prices[1] + prices[2] + prices[3] + prices[4];
+            setState(STATE_DEMO);
+        }
+        break;
+
+        case MODE_LENZ:
+        {
+            if (eeprom_validate())
+            {
+                eeprom_getPrices();
+                if (price_sum <= 0)
+                    setState(STATE_PRICES_EMPTY);
+                else
+                    setState(STATE_DEMO);
+            }
+            else
+                setState(STATE_EEPROM_INVALID);
+        }
+        break;
+    }
+}
 
 
 
@@ -252,15 +330,35 @@ float rot_acc, rot_time, rot_led_start;
 void setState (uint8_t st)
 {
     state = st;
-    anim_start = time_cur;
+    time_anim_start = time_cur;
 }
 
 
 
-//*********************************[setMode]***********************************
-void setMode (uint8_t md)
+//*********************************[init]***************************************
+// initialize program
+void gluecksrad_init (void)
 {
-    mode = md;
+    leds_init();
+    robolib_init();
+    leds_clearAll();
+    systick_init();
+    random_init();
+
+    setMode(eeprom_getMode());
+
+    // show current mode
+    struct sLed color;
+
+    if (mode == MODE_LENZ)
+        color = getMenuColor(MENU_MODE_LENZ);
+    else // if (mode == MODE_DEFAULT)
+        color = getMenuColor(MENU_MODE_DEFAULT);
+
+    leds_setAll(color.r, color.g, color.b);
+    systick_delay(1000);
+
+    updateTime();
 }
 
 
@@ -269,7 +367,7 @@ void setMode (uint8_t md)
 
 void animate (void)
 {
-    uint32_t diff = time_cur - anim_start;
+    uint32_t diff = time_cur - time_anim_start;
 
     switch (state)
     {
@@ -381,41 +479,101 @@ void animate (void)
         }
         break;
 
-        case STATE_RESET_PRICES:
+        case STATE_MENU_STARTING:
         {
-            static const uint16_t half = EEPROM_RESET_DELAY / 2;
+            struct sLed led_color, menu_color;
 
-            if (diff < half)  // green -> yellow
-                leds_setAll(LEDS_MAX * diff / half, LEDS_MAX, 0);
-            else  // yellow -> red
-                leds_setAll(LEDS_MAX, LEDS_MAX * (EEPROM_RESET_DELAY - diff) / half, 0);
+            uint8_t
+                f = 10 * diff / MENU_START_DELAY,
+                g = 10 - f,
+                i = LEDS_COUNT;
 
-            //wait EEPROM_RESET_DELAY milliseconds during btnMode pressed
-            if (time_cur - time_btnMode_start >= EEPROM_RESET_DELAY)
+            while (i--)
             {
-                setState(STATE_PRICES_RESETTED);
+                led_color = getLedColor(i);
+                menu_color = getLedMenuColor(i);
 
-                //reset eeprom
-                uint16_t _prices[PRICES_COUNT] = PRICES_MAX;
-                prices[0] = _prices[0];
-                prices[1] = _prices[1];
-                prices[2] = _prices[2];
-                prices[3] = _prices[3];
-                prices[4] = _prices[4];
+                leds_set(i,
+                    (menu_color.r * f + led_color.r * g) / 20,
+                    (menu_color.g * f + led_color.g * g) / 20,
+                    (menu_color.b * f + led_color.b * g) / 20
+                );
+            }
 
-                if (mode == MODE_LENZ)
-                    eeprom_setPrices();
+            //wait MENU_START_DELAY milliseconds during btnMode pressed
+            if (time_cur - time_btnMode_start >= MENU_START_DELAY)
+            {
+                setState(STATE_MENU_NEXT);
+                menu = MENU_RESET;
             }
         }
         break;
 
-        case STATE_PRICES_RESETTED:
+        case STATE_MENU:
         {
-            leds_setAll(LEDS_MAX * (diff % 1000 < 500), 0, 0);  // blink red
+            uint8_t i = LEDS_COUNT, led_menu, d;
+            struct sLed menu_color;
 
-            //break up after 3 seconds
-            if (diff >= 3000)
-                setState(STATE_DEMO);
+            while (i--)
+            {
+                led_menu = getLedMenu(i);
+                d = 9 * (led_menu != menu) + 1;
+                menu_color = getMenuColor(led_menu);
+
+                leds_set(i, menu_color.r / d, menu_color.g / d, menu_color.b / d);
+            }
+        }
+        break;
+
+        case STATE_MENU_NEXT:
+        {
+            uint8_t i = LEDS_COUNT, led_menu, d;
+            struct sLed menu_color;
+
+            while (i--)
+            {
+                led_menu = getLedMenu(i);
+                d = 8 * ((led_menu != menu) && (led_menu != (menu + 1) % MENU_COUNT)) + 2;
+                menu_color = getMenuColor(led_menu);
+
+                leds_set(i, menu_color.r / d, menu_color.g / d, menu_color.b / d);
+            }
+        }
+        break;
+
+        case STATE_MENU_SELECT:
+        {
+            struct sLed led_color, menu_color;
+
+            uint8_t
+                f = 10 * diff / MENU_SELECT_DELAY,
+                i = LEDS_COUNT;
+
+            while (i--)
+            {
+                led_color = getLedMenuColor(i);
+                menu_color = getMenuColor(menu);
+
+                leds_set(i,
+                    (menu_color.r * f + led_color.r * 2) / 20,
+                    (menu_color.g * f + led_color.g * 2) / 20,
+                    (menu_color.b * f + led_color.b * 2) / 20
+                );
+            }
+
+            //wait MENU_SELECT_DELAY milliseconds during btnBumper pressed
+            if (time_cur - time_btnBumper_start >= MENU_SELECT_DELAY)
+                setState(STATE_MENU_SELECTED);
+        }
+        break;
+
+        case STATE_MENU_SELECTED:
+        {
+            struct sLed color = getMenuColor(menu);
+            if (diff % 1000 < 500)
+                leds_setAll(color.r, color.g, color.b);
+            else
+                leds_setAll(0, 0, 0);
         }
         break;
 
@@ -448,49 +606,219 @@ void animate (void)
 
 
 
-//*********************************[init]***************************************
-// initialize program
-void gluecksrad_init (void)
+//*********************************[getRotationTarget]**************************
+
+uint8_t getRotationTarget (void)
 {
-    leds_init();
-    robolib_init();
-    leds_clearAll();
-    systick_init();
-    random_init();
+    if (price_sum <= 0) return 0;
+
+    // choose random price
+    uint16_t i, num = random(), ran = num % price_sum;
+    uint8_t cat;
+
+    // select category dependent on the probability
+    for (cat = 0; cat < PRICES_COUNT && ran >= prices[cat]; cat++)
+        ran -= prices[cat];
+
+    #define TARGET_STEP 3
+    num = LEDS_COUNT * TARGET_STEP + num % 20;
+
+    for (i = num % 20; i < num; i += TARGET_STEP)
+        if (getLedPrice(i % 20) == cat)
+            return i % 20;
+
+    //leds_setAll(1,1,0);
+    //delay_ms(100);
+    return 0;
+}
 
 
 
-    // select mode
-    if (buttons_getMode())
+//**********************************[handleBumperPressed]***********************
+
+void handleBumperPressed (void)
+{
+    switch(state)
     {
-        setMode(MODE_LENZ);
-        if (eeprom_validate())
+        case STATE_DEMO:
         {
-            eeprom_getPrices();
-            if (price_sum <= 0)
-                setState(STATE_PRICES_EMPTY);
+            if (price_sum > 0)
+            {
+                rot_target = getRotationTarget();
+
+                uint16_t rounds = 2 * (14 + getLedPrice(rot_target)) * (15 + (time_cur % 5)) / 39;
+                rot_target_abs = rounds * 20 + rot_target;
+                rot_acc = - ROT_VEL * ROT_VEL / (float)(2 * (rot_target_abs) + 1);
+                rot_time = 1000.0 * abs_float(ROT_VEL / rot_acc);
+
+                setState(STATE_ROTATING);
+            }
             else
-                setState(STATE_DEMO);
+                setState(STATE_PRICES_EMPTY);
         }
-        else
-            setState(STATE_EEPROM_INVALID);
+        break;
 
-        leds_setAll(LEDS_MAX, LEDS_MAX, LEDS_MAX);
-        systick_delay(1000);
+        case STATE_MENU:
+        {
+            setState(STATE_MENU_SELECT);
+            time_btnBumper_start = time_cur;
+        }
+        break;
     }
-    else
+}
+
+
+
+//**********************************[handleBumperNotPressed]********************
+
+void handleBumperNotPressed (void)
+{
+    if (time_btnBumper_start)
+        time_btnBumper_start = 0;
+
+    switch (state)
     {
-        price_sum = prices[0] + prices[1] + prices[2] + prices[3] + prices[4];
-        setState(STATE_DEMO);
-        setMode(MODE_DEFAULT);
-    }
+        case STATE_MENU_SELECT:
+        {
+            setState(STATE_MENU);
+        }
+        break;
 
-    updateTime();
+        case STATE_MENU_SELECTED:
+        {
+            //break up after 3 seconds
+            if (time_cur - time_anim_start >= 3000)
+            {
+                switch (menu)
+                {
+                    case MENU_EXIT:
+                    {
+                        if (price_sum <= 0 && mode != MODE_DEFAULT)
+                            setState(STATE_PRICES_EMPTY);
+                        else
+                            setState(STATE_DEMO);
+                    }
+                    break;
+
+                    case MENU_MODE_DEFAULT:
+                    {
+                        setMode(MODE_DEFAULT);
+                    }
+                    break;
+
+                    case MENU_MODE_LENZ:
+                    {
+                        setMode(MODE_LENZ);
+                    }
+                    break;
+
+                    case MENU_EEPROM_RESET:
+                    {
+                        //reset price array
+                        uint16_t _prices[PRICES_COUNT] = PRICES_MAX;
+                        prices[0] = _prices[0];
+                        prices[1] = _prices[1];
+                        prices[2] = _prices[2];
+                        prices[3] = _prices[3];
+                        prices[4] = _prices[4];
+
+                        //reset eeprom
+                        eeprom_setPrices();
+
+                        setState(STATE_DEMO);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+}
+
+
+
+//**********************************[handleModePressed]*************************
+
+void handleModePressed (void)
+{
+    switch (state)
+    {
+        case STATE_ROTATE_FINISH:
+        {
+            setState(STATE_ROTATE_FINISHED);
+        }
+        break;
+
+        case STATE_DEMO:
+        case STATE_PRICES_EMPTY:
+        {
+            if (time_btnMode_start)
+            {
+                if (time_cur - time_btnMode_start > 1000)
+                    setState(STATE_MENU_STARTING);
+            }
+            else
+                time_btnMode_start = time_cur;
+        }
+        break;
+
+        case STATE_MENU:
+        {
+            setState(STATE_MENU_NEXT);
+        }
+        break;
+
+        case STATE_EEPROM_INVALID:
+        {
+            eeprom_save_key();
+            eeprom_setPrices();
+            setState(STATE_DEMO);
+        }
+        break;
+    }
+}
+
+
+
+//**********************************[handleModeNotPressed]**********************
+
+void handleModeNotPressed (void)
+{
+    if (time_btnMode_start)
+        time_btnMode_start = 0;
+
+    switch (state)
+    {
+        case STATE_MENU_STARTING:
+        {
+            if (price_sum > 0)
+                setState(STATE_DEMO);
+            else
+                setState(STATE_PRICES_EMPTY);
+        }
+        break;
+
+        case STATE_MENU_NEXT:
+        {
+            setState(STATE_MENU);
+            menu = (menu + 1) % MENU_COUNT;
+        }
+        break;
+
+        case STATE_ROTATE_FINISHED:
+        {
+            if (price_sum > 0)
+                setState(STATE_DEMO);
+            else
+                setState(STATE_PRICES_EMPTY);
+        }
+        break;
+    }
 }
 
 
 
 //************************************[main]************************************
+
 int main (void)
 {
     // initialize
@@ -503,82 +831,14 @@ int main (void)
         updateTime();
 
         if (buttons_getBumper())
-        {
-            if (state == STATE_DEMO)
-            {
-                if (price_sum > 0)
-                {
-                    rot_target = getRotationTarget();
+            handleBumperPressed();
+        else
+            handleBumperNotPressed();
 
-                    uint16_t rounds = 2 * (14 + getLedPrice(rot_target)) * (15 + (time_cur % 5)) / 39;
-                    rot_target_abs = rounds * 20 + rot_target;
-                    rot_acc = - ROT_VEL * ROT_VEL / (float)(2 * (rot_target_abs) + 1);
-                    rot_time = 1000.0 * abs_float(ROT_VEL / rot_acc);
-
-                    setState(STATE_ROTATING);
-                }
-                else
-                    setState(STATE_PRICES_EMPTY);
-            }
-        }
-
-        if (buttons_getMode()) // btnMode pressed
-        {
-            switch (state)
-            {
-                case STATE_ROTATE_FINISH:
-                {
-                    setState(STATE_ROTATE_FINISHED);
-                }
-                break;
-
-                case STATE_DEMO:
-                case STATE_PRICES_EMPTY:
-                {
-                    if (time_btnMode_start)
-                    {
-                        if (time_cur - time_btnMode_start > 1000)
-                            setState(STATE_RESET_PRICES);
-                    }
-                    else
-                        time_btnMode_start = time_cur;
-                }
-                break;
-
-                case STATE_EEPROM_INVALID:
-                {
-                    eeprom_save_key();
-                    eeprom_setPrices();
-                    setState(STATE_DEMO);
-                }
-            }
-        }
-        else  // btnMode not pressed
-        {
-            if (time_btnMode_start)
-                time_btnMode_start = 0;
-
-            switch (state)
-            {
-                case STATE_RESET_PRICES:
-                {
-                    if (price_sum > 0)
-                        setState(STATE_DEMO);
-                    else
-                        setState(STATE_PRICES_EMPTY);
-                }
-                break;
-
-                case STATE_ROTATE_FINISHED:
-                {
-                    if (price_sum > 0)
-                        setState(STATE_DEMO);
-                    else
-                        setState(STATE_PRICES_EMPTY);
-                }
-                break;
-            }
-        }
+        if (buttons_getMode())
+            handleModePressed();
+        else
+            handleModeNotPressed();
 
         animate();
     }
