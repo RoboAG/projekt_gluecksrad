@@ -48,6 +48,11 @@ cd ${PATH_RICHARD}test_datenbus/
 robolib_all
 if [ $? -ne 0 ]; then exit -1; fi
 
+echo "# Fruehlingsmarkt_03_23"
+cd ${PATH_RICHARD}Fruehlingsmarkt_03_23/
+robolib_all
+if [ $? -ne 0 ]; then exit -1; fi
+
 
 
 echo ""
@@ -79,9 +84,10 @@ cd ${PATH_ALEX}timer/
 robolib_all
 if [ $? -ne 0 ]; then exit -1; fi
 
-#cd ${PATH_ALEX}test/
-#robolib_all
-#if [ $? -ne 0 ]; then exit -1; fi
+echo "# Fruehlingsmarkt_03_23"
+cd ${PATH_ALEX}Fruehlingsmarkt_03_23/
+robolib_all
+if [ $? -ne 0 ]; then exit -1; fi
 
 
 
@@ -112,10 +118,15 @@ if [ $? -ne 0 ]; then exit -1; fi
 
 
 echo ""
-echo "## Main"
-PATH_MAIN="${PATH_DEVEL}main/"
+echo "## Main (Fruehlingsmarkt_2018)"
+PATH_MAIN="${PATH_SOFTWARE}Fruehlingsmarkt_2018/"
 
-echo "# Fruehlingsmarkt"
-cd ${PATH_MAIN}Fruehlingsmarkt/
+echo "# simple"
+cd ${PATH_MAIN}simple/
+robolib_all
+if [ $? -ne 0 ]; then exit -1; fi
+
+echo "# menu"
+cd ${PATH_MAIN}menu/
 robolib_all
 if [ $? -ne 0 ]; then exit -1; fi
