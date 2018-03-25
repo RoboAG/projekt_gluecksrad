@@ -2,13 +2,15 @@
 * main.c                                                                       *
 * ======                                                                       *
 *                                                                              *
-* Version: 1.0.0                                                               *
-* Date   : 21.03.18                                                            *
+* Version: 11.2.0                                                               *
+* Date   : 25.03.18                                                            *
 * Author : Alexander Feilke                                                    *
 *                                                                              *
 * See also:                                                                    *
 *   https://github.com/RoboAG/projekt_gluecksrad                               *
 *******************************************************************************/
+
+
 
 //*********************************<Included files>*****************************
 #include <math.h>
