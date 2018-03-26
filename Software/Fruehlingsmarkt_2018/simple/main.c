@@ -163,7 +163,7 @@ int16_t price_sum = 620;
 
 //use a specific key to check whether the eeprom
 //is on the actual gluecksrad program version
-int eeprom_validate (void)
+uint8_t eeprom_validate (void)
 {
     eeprom_adress_set(0);                     // 0
     return
