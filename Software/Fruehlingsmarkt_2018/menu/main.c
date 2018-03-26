@@ -120,7 +120,7 @@ uint8_t getLedPrice            (uint8_t i);
 void    updateTime             (void);
 
 void    eeprom_save_key        (void);
-uint8_t eeprom_validate        (void);
+int     eeprom_validate        (void);
 void    eeprom_getPrices       (void);
 void    eeprom_setPrices       (void);
 uint8_t eeprom_getMode         (void);
@@ -202,7 +202,7 @@ int16_t price_sum = 620;
 
 //use a specific key to check whether the eeprom
 //is on the actual gluecksrad program version
-uint8_t eeprom_validate (void)
+int eeprom_validate (void)
 {
     eeprom_adress_set(0);                     // 0
     return
@@ -638,7 +638,7 @@ uint8_t getRotationTarget (void)
 
 void handleBumperPressed (void)
 {
-    switch (state)
+    switch(state)
     {
         case STATE_DEMO:
         {
