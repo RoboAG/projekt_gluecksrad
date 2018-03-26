@@ -72,7 +72,7 @@ void    eeprom_setPrices  (void);
 
 uint8_t getRotationTarget (void);
 
-void    setState          (uint8_t st)
+void    setState          (uint8_t st);
 void    setMode           (uint8_t md);
 
 void    gluecksrad_init   (void);
