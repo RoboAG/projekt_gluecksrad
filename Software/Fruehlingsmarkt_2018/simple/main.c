@@ -57,22 +57,27 @@ const struct sLed price_colors[PRICES_COUNT] = {
 
 
 //*********************************<Prototypes>*********************************
-void test (uint8_t i);
+float    mod_float        (float v, float m);
+float    abs_float        (float v);
+float    abs_int16        (int16_t v);
 
-uint8_t getLedPrice (uint8_t i);
+uint8_t getLedPrice       (uint8_t i);
 
-void updateTime (void);
+void    updateTime        (void);
 
-void eeprom_save_key (void);
-int  eeprom_validate (void);
-void eeprom_getPrices (void);
-void eeprom_setPrices (void);
+void    eeprom_save_key   (void);
+uint8_t eeprom_validate   (void);
+void    eeprom_getPrices  (void);
+void    eeprom_setPrices  (void);
 
 uint8_t getRotationTarget (void);
 
-void gluecksrad_init (void);
-void animate (void);
-int  main (void);
+void    setState          (uint8_t st)
+void    setMode           (uint8_t md);
+
+void    gluecksrad_init   (void);
+void    animate           (void);
+int     main              (void);
 
 
 
