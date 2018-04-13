@@ -47,7 +47,9 @@ struct sLed {
 void leds_init(void);
 
 void leds_set(uint8_t i, uint8_t r, uint8_t g, uint8_t b);
+void leds_set2(uint8_t i, struct sLed color);
 void leds_setAll(uint8_t r, uint8_t g, uint8_t b);
+void leds_setAll2(struct sLed color);
 void leds_clear(uint8_t i);
 void leds_clearAll(void);
 

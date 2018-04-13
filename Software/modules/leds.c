@@ -69,12 +69,27 @@ void leds_set(uint8_t i, uint8_t r, uint8_t g, uint8_t b) {
     }
 }
 
+void leds_set2(uint8_t i, struct sLed color) {
+
+    if (i < LEDS_COUNT) {
+        leds[i] = color;
+    }
+}
+
 //*********************************[leds_setAll]********************************
 void leds_setAll(uint8_t r, uint8_t g, uint8_t b) {
 
     uint8_t i = LEDS_COUNT;
     while(i--) {
         leds_set(i, r, g, b);
+    }
+}
+
+void leds_setAll2(struct sLed color) {
+
+    uint8_t i = LEDS_COUNT;
+    while(i--) {
+        leds_set2(i, color);
     }
 }
 

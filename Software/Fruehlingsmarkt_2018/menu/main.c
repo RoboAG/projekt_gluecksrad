@@ -30,28 +30,30 @@
 
 
 //*********************************<Flags>**************************************
-#define MODE_DEFAULT          1
-#define MODE_LENZ             2
+#define MODE_DEFAULT           1
+#define MODE_LENZ              2
 
-#define STATE_STARTING        0
-#define STATE_DEMO            1
-#define STATE_ROTATING        2
-#define STATE_ROTATE_FINISH   3
-#define STATE_ROTATE_FINISHED 4
-#define STATE_MENU_STARTING   5
-#define STATE_MENU            6
-#define STATE_MENU_NEXT       7
-#define STATE_MENU_SELECT     8
-#define STATE_MENU_SELECTED   9
-#define STATE_RESET_PRICES    10
-#define STATE_PRICES_EMPTY    11
-#define STATE_EEPROM_INVALID  12
+#define STATE_STARTING         0
+#define STATE_DEMO             1
+#define STATE_ROTATING         2
+#define STATE_ROTATE_FINISH    3
+#define STATE_ROTATE_FINISHED  4
+#define STATE_MENU_STARTING    5 
+#define STATE_MENU             6 
+#define STATE_MENU_NEXT        7
+#define STATE_MENU_SELECT      8
+#define STATE_MENU_SELECTED    9
+#define STATE_SHOW_PRICES     10
+#define STATE_RESET_PRICES    11
+#define STATE_PRICES_EMPTY    12
+#define STATE_EEPROM_INVALID  13
 
-#define MENU_EXIT             0
-#define MENU_MODE_DEFAULT     1
-#define MENU_MODE_LENZ        2
-#define MENU_EEPROM_RESET     3
-#define MENU_COUNT            4
+#define MENU_EXIT              0
+#define MENU_MODE_DEFAULT      1
+#define MENU_MODE_LENZ         2
+#define MENU_SHOW_PRICES       3
+#define MENU_EEPROM_RESET      4
+#define MENU_COUNT             5
 
 // wheel mode
 uint8_t mode = MODE_DEFAULT;
@@ -76,10 +78,11 @@ uint8_t menu = MENU_EEPROM_RESET;
 #define MENU_SELECT_DELAY  3000
 
 
-const struct sLed menu_colors[PRICES_COUNT] = {
+const struct sLed menu_colors[MENU_COUNT] = {
     { LEDS_MIN, LEDS_MIN, LEDS_MAX },
     { LEDS_MIN, LEDS_MAX, LEDS_MIN },
     { LEDS_MAX, LEDS_MAX, LEDS_MIN },
+    { LEDS_MAX, LEDS_MIN, LEDS_MAX },
     { LEDS_MAX, LEDS_MIN, LEDS_MIN }
 };
 
@@ -283,7 +286,6 @@ uint8_t  rot_target;     // target led (0-20]
 float rot_acc, rot_time;
 
 
-
 //*********************************[setState]***********************************
 void setMode (uint8_t md)
 {
@@ -348,14 +350,12 @@ void gluecksrad_init (void)
     setMode(eeprom_getMode());
 
     // show current mode
-    struct sLed color;
 
     if (mode == MODE_LENZ)
-        color = getMenuColor(MENU_MODE_LENZ);
+        leds_setAll2(getMenuColor(MENU_MODE_LENZ));
     else // if (mode == MODE_DEFAULT)
-        color = getMenuColor(MENU_MODE_DEFAULT);
-
-    leds_setAll(color.r, color.g, color.b);
+        leds_setAll2(getMenuColor(MENU_MODE_DEFAULT));
+    
     systick_delay(1000);
 
     updateTime();
@@ -453,7 +453,7 @@ void animate (void)
                     for (i = rot_target - d % 10; i <= rot_target + d % 10; i++)
                     {
                         if (d > 10) color = getLedColor((i + 800) % 20);
-                        leds_set((i + 800) % 20, color.r, color.g, color.b);
+                        leds_set2((i + 800) % 20, color);
                     }
                 }
                 break;
@@ -471,7 +471,7 @@ void animate (void)
                         if ((sec - i + 40) % 4)
                             leds_set(i, led_color.r / 5, led_color.g / 5, led_color.b / 5);
                         else
-                            leds_set(i, color.r, color.g, color.b);
+                            leds_set2(i, color);
                     }
                 }
                 break;
@@ -571,9 +571,27 @@ void animate (void)
         {
             struct sLed color = getMenuColor(menu);
             if (diff % 1000 < 500)
-                leds_setAll(color.r, color.g, color.b);
+                leds_setAll2(color);
             else
                 leds_setAll(0, 0, 0);
+        }
+        break;
+
+        case STATE_SHOW_PRICES:
+        {
+            uint8_t i, show = (diff / 5000) % PRICES_COUNT;
+            
+            struct sLed color = price_colors[show];
+            
+            // set different color before starting position
+            leds_set2(LEDS_COUNT - 1, price_colors[(show + 1) % PRICES_COUNT]);
+            
+            // show value in binary system
+            for (i = 0; i < LEDS_COUNT; i++)
+            {
+                if (prices[show] & 1 <<i)
+                    leds_set2(i, color);
+            }
         }
         break;
 
@@ -663,6 +681,11 @@ void handleBumperPressed (void)
             setState(STATE_MENU_SELECT);
             time_btnBumper_start = time_cur;
         }
+        
+        case STATE_SHOW_PRICES:
+        {
+            setState(STATE_MENU);
+        }
         break;
     }
 }
@@ -709,6 +732,12 @@ void handleBumperNotPressed (void)
                     case MENU_MODE_LENZ:
                     {
                         setMode(MODE_LENZ);
+                    }
+                    break;
+		    
+                    case MENU_SHOW_PRICES:
+                    {
+                        setState(STATE_SHOW_PRICES);
                     }
                     break;
 

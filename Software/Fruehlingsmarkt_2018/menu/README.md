@@ -26,5 +26,5 @@ Allgemeine Beschreibung siehe [hier](../README.md).
 - zurzeit gibt es 4 Menüpunkte:
     - Blau: beendet das Menü ohne eine Aktion
     - Grün: wechselt in den Standard-Modus
-    - Blau: wechselt in den Lenz-Modus
+    - Gelb: wechselt in den Lenz-Modus
     - Rot : resettet die Preisliste
