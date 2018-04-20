@@ -581,6 +581,9 @@ void animate (void)
         {
             uint8_t i, show = (diff / 5000) % PRICES_COUNT;
             
+            if(((time_last - time_anim_start) / 5000) % PRICES_COUNT != show)
+                leds_clearAll();
+                
             struct sLed color = price_colors[show];
             
             // set different color before starting position
@@ -681,6 +684,7 @@ void handleBumperPressed (void)
             setState(STATE_MENU_SELECT);
             time_btnBumper_start = time_cur;
         }
+	break;
         
         case STATE_SHOW_PRICES:
         {
