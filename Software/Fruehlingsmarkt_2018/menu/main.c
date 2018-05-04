@@ -38,12 +38,12 @@
 #define STATE_ROTATING         2
 #define STATE_ROTATE_FINISH    3
 #define STATE_ROTATE_FINISHED  4
-#define STATE_MENU_STARTING    5 
-#define STATE_MENU             6 
+#define STATE_MENU_STARTING    5
+#define STATE_MENU             6
 #define STATE_MENU_NEXT        7
 #define STATE_MENU_SELECT      8
 #define STATE_MENU_SELECTED    9
-#define STATE_SHOW_PRICES     10
+//#define STATE_SHOW_PRICES     10
 #define STATE_RESET_PRICES    11
 #define STATE_PRICES_EMPTY    12
 #define STATE_EEPROM_INVALID  13
@@ -51,9 +51,9 @@
 #define MENU_EXIT              0
 #define MENU_MODE_DEFAULT      1
 #define MENU_MODE_LENZ         2
-#define MENU_SHOW_PRICES       3
-#define MENU_EEPROM_RESET      4
-#define MENU_COUNT             5
+//#define MENU_SHOW_PRICES       3
+#define MENU_EEPROM_RESET      3
+#define MENU_COUNT             4
 
 // wheel mode
 uint8_t mode = MODE_DEFAULT;
@@ -355,7 +355,7 @@ void gluecksrad_init (void)
         leds_setAll2(getMenuColor(MENU_MODE_LENZ));
     else // if (mode == MODE_DEFAULT)
         leds_setAll2(getMenuColor(MENU_MODE_DEFAULT));
-    
+
     systick_delay(1000);
 
     updateTime();
@@ -576,28 +576,45 @@ void animate (void)
                 leds_setAll(0, 0, 0);
         }
         break;
-
+/*
         case STATE_SHOW_PRICES:
         {
-            uint8_t i, show = (diff / 5000) % PRICES_COUNT;
-            
-            if(((time_last - time_anim_start) / 5000) % PRICES_COUNT != show)
-                leds_clearAll();
-                
-            struct sLed color = price_colors[show];
-            
+            uint8_t i, show = (diff / 10000) % PRICES_COUNT;
+
+            struct sLed color = price_colors[(show + 1) % PRICES_COUNT];
+
             // set different color before starting position
-            leds_set2(LEDS_COUNT - 1, price_colors[(show + 1) % PRICES_COUNT]);
-            
-            // show value in binary system
-            for (i = 0; i < LEDS_COUNT; i++)
+            for (i = 4; i < LEDS_COUNT; i += 6)
             {
-                if (prices[show] & 1 <<i)
-                    leds_set2(i, color);
+                leds_set2(i    , color);
+                leds_set2(i + 1, color);
+            }
+
+            color = price_colors[show];
+
+            uint16_t
+                val = prices[show];     // value
+                dig = val % 10,         // digit value
+                dec = 0;                // decimal pos
+
+            leds_clearAll();
+
+            // show value in bindec system
+            while (dig)
+            {
+                dig = val % 10;
+                val /= 10;
+
+                for (i = 0; i < 4; i++)
+                {
+                    if (dig & 1 << i)
+                        leds_set2(6 * dec + i, color);
+                }
+                dec++;
             }
         }
         break;
-
+*/
         case STATE_PRICES_EMPTY:
         {
             uint8_t i = LEDS_COUNT;
@@ -685,12 +702,13 @@ void handleBumperPressed (void)
             time_btnBumper_start = time_cur;
         }
 	break;
-        
+/*
         case STATE_SHOW_PRICES:
         {
             setState(STATE_MENU);
         }
         break;
+*/
     }
 }
 
@@ -738,13 +756,13 @@ void handleBumperNotPressed (void)
                         setMode(MODE_LENZ);
                     }
                     break;
-		    
+/*
                     case MENU_SHOW_PRICES:
                     {
                         setState(STATE_SHOW_PRICES);
                     }
                     break;
-
+*/
                     case MENU_EEPROM_RESET:
                     {
                         //reset price array
