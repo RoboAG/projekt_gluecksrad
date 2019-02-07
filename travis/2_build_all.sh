@@ -20,7 +20,7 @@ PATH_DEVEL="${PATH_SOFTWARE}devel/"
 
 echo ""
 echo "## Tim"
-PATH_TIM="${PATH_DEVEL}Tim_atmeg88p_smd/"
+PATH_TIM="${PATH_DEVEL}Tim_atmega88p_smd/"
 
 echo "# test_datenbus"
 cd ${PATH_TIM}test_datenbus/
