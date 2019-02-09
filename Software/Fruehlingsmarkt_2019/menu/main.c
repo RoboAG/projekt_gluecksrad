@@ -70,7 +70,7 @@ uint8_t menu = MENU_EEPROM_RESET;
 #define VERSION 10
 #define EEPROM_KEY (0b1010011101100000 + VERSION)
 #define PRICES_COUNT 5
-#define PRICES_MAX { 300, 150, 150, 15, 5 }
+#define PRICES_MAX { 170, 70, 38, 11, 9 }
 #define ROT_VEL 80
 
 #define EEPROM_RESET_DELAY 5000

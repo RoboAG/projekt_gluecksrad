@@ -5,12 +5,12 @@
 -------------
 - Preise
     - es gibt insgesamt 5 verschiedene Preiskategorien:
-        - 1: 300x, blau
-        - 2: 150x, grün
-        - 3: 150x, rot
-        - 4:  15x, gelb
-        - 5:   5x, weiß
-    - die Wahrscheinlichkeiten sind im besten Fall im Verhältnis von Anzahl zu Preissumme verteilt
+        - 1: 170x, blau
+        - 2:  70x, grün
+        - 3:  38x, rot
+        - 4:  11x, weiß
+        - 5:   9x, gelb
+    - die Wahrscheinlichkeiten sind im besten Fall im Verhältnis von verbleibender Anzahl zur übrigen Gesamtpreiszahl verteilt
 - Buttons:
     - es gibt insgesamt zwei Buttons:
         - Bumper: extern am Glücksrad anzuschließender Riesenknopf
