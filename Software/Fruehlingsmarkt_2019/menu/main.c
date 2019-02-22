@@ -90,8 +90,8 @@ const struct sLed price_colors[PRICES_COUNT] = {
     { LEDS_MIN, LEDS_MIN, LEDS_MAX },
     { LEDS_MIN, LEDS_MAX, LEDS_MIN },
     { LEDS_MAX, LEDS_MIN, LEDS_MIN },
-    { LEDS_MAX, LEDS_MAX, LEDS_MIN },
-    { LEDS_MAX, LEDS_MAX, LEDS_MAX }
+    { LEDS_MAX, LEDS_MAX, LEDS_MAX },
+    { LEDS_MAX, LEDS_MAX, LEDS_MIN }
 };
 
 
