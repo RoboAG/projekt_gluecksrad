@@ -2,8 +2,8 @@
 * main.c                                                                       *
 * ======                                                                       *
 *                                                                              *
-* Version: 10.5.1                                                              *
-* Date   : 25.03.18                                                            *
+* Version: 10.5.3                                                             *
+* Date   : 22.02.19                                                            *
 * Author : Alexander Feilke                                                    *
 *                                                                              *
 * See also:                                                                    *

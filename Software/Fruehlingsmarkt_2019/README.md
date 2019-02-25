@@ -5,11 +5,11 @@
 
 - Preise
     - es gibt insgesamt 5 verschiedene Preiskategorien mit absteigender Preiswertigkeit:
-        - 1: gelb
-        - 2: weiß
-        - 3: rot
-        - 4: grün
-        - 5: blau
+        - 1: gold (gelb)
+        - 2: silber (weiß)
+        - 3: rubin (rot)
+        - 4: smaragd (grün)
+        - 5: saphir (blau)
     - die Wahrscheinlichkeiten sind im Verhältnis von verbleibender Anzahl zur übrigen Gesamtpreiszahl verteilt
 - Buttons:
     - es gibt insgesamt zwei Buttons:
