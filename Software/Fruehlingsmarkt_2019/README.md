@@ -1,7 +1,6 @@
 # Glücksrad
------------
 
-## Allgemein
+## Preise
 
 - Preise
     - es gibt insgesamt 5 verschiedene Preiskategorien mit absteigender Preiswertigkeit:
@@ -11,18 +10,10 @@
         - 4: smaragd (grün)
         - 5: saphir (blau)
     - die Wahrscheinlichkeiten sind im Verhältnis von verbleibender Anzahl zur übrigen Gesamtpreiszahl verteilt
-- Buttons:
-    - es gibt insgesamt zwei Buttons:
-        - Bumper: extern am Glücksrad anzuschließender Riesenknopf
-        - Mode:   kleiner, roter, an der Rückseite des Glücksrades befestigter Knopf
 
 
 
-
-## Ablauf
-
-
-### Start:
+## Start:
 
 - es wird der letzte Glücksrad-Modus geladen, ggf. die gespeicherte Preisliste
 - der geladene Modus wird durch 1-sekündiges Leuchten aller LEDs angezeigt:
@@ -31,8 +22,7 @@
 - es startet die Demo-Animation
 
 
-
-### Drehen:
+## Drehen:
 
 - durch Drücken auf den Bumper im Demo-Modus wird die Dreh-Animation zu einem zufälligen Feld ausgelöst
 - danach leuchten die LEDs in 3 verschiedenen Animationen (je nach Preisklasse) in der erdrehten Farbe auf
@@ -41,7 +31,14 @@
 
 
 
-### Menü:
+## Bedienung
+- Buttons:
+    - es gibt insgesamt zwei Buttons:
+        - Bumper: extern am Glücksrad anzuschließender Riesenknopf
+        - Mode:   kleiner, roter, an der Rückseite des Glücksrades befestigter Knopf
+
+
+## Menü:
 
 - durch 3-sekündiges Drücken des Mode-Buttons im Demo-Modus oder während der 'Preise-Leer' Animation wird das Menü angezeigt
 - Navigiert wird mithilfe des Mode-Buttons
@@ -54,7 +51,7 @@
 
 
 
-### Modi:
+## Modi:
 
 - Standard
     - die Preisverteilung entspricht den Standard-Lenz-Werten und bleibt konstant
