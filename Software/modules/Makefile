@@ -1,10 +1,10 @@
 ###############################################################################
 #                                                                             #
-# Makefile                                                                    #
-# ========                                                                    #
+# Makefile (LowLevel2)                                                        #
+# ====================                                                        #
 #                                                                             #
-# Version: 1.2.6                                                              #
-# Date   : 24.09.21                                                           #
+# Version: 1.0.3                                                              #
+# Date   : 25.09.21                                                           #
 # Author : Peter Weissig                                                      #
 #                                                                             #
 # Source code was taken from:                                                 #
@@ -14,56 +14,34 @@
 #   https://github.com/RoboAG/projekt_gluecksrad                              #
 ###############################################################################
 
-NAME_GIT_THIS=gluecksrad
+CURRENTDIR = $(notdir $(patsubst %/,%, \
+  $(dir $(abspath $(lastword $(MAKEFILE_LIST))))))
 
-SUBDIRS = Fruehlingsmarkt_2018 Fruehlingsmarkt_2019 devel
+SUBDIRS = $(patsubst %/.,%,$(wildcard */.))
 
 ###############################################################################
 # define phony targets for make commands
-.PHONY: all all_init warn  $(SUBDIRS) clean \
-        update status push pull
+.PHONY: all all_init  $(SUBDIRS)  clean
 
-
-# build specific commands
 all: all_init $(SUBDIRS)
 
 all_init:
-	@echo
-	@echo "### building $(NAME_GIT_THIS) ###"
+	@echo ""
+	@echo ""
+	@echo "## building $(CURRENTDIR) ##"
 
-warn:
-	@echo
-	@echo "reducing output to warnings"
-	@$(MAKE) | grep -A 5 -B 5 -i warn; dummy=$?
 
 $(SUBDIRS):
-	$(MAKE) -C $@
+	@echo ""
+	@echo "# building $@ #"
+	$(MAKE) -C $@ -f "$(ROBOLIB_MAKEFILE)"
+
 
 clean:
 	@echo
-	@echo "### clean $(NAME_GIT_THIS) ###"
+	@echo "# clean $(CURRENTDIR) #"
 	@for dir in $(SUBDIRS); do \
-	    $(MAKE) -C $$dir clean; \
+	    $(MAKE) -C $$dir -f "$(ROBOLIB_MAKEFILE)" clean; \
 	done
-
-
-# git specific commands
-update: pull
-
-status:
-	@echo ""
-	@echo "### status of $(NAME_GIT_THIS) ###"
-	@git status --untracked-files
-
-push:
-	@echo ""
-	@echo "### pushing of $(NAME_GIT_THIS) ###"
-	git push
-
-pull:
-	@echo ""
-	@echo "### update $(NAME_GIT_THIS) ###"
-	git pull
-
 
 ###############################################################################
