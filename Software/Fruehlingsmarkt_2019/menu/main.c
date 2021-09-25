@@ -82,7 +82,7 @@ const struct sLed menu_colors[MENU_COUNT] = {
     { LEDS_MIN, LEDS_MIN, LEDS_MAX },
     { LEDS_MIN, LEDS_MAX, LEDS_MIN },
     { LEDS_MAX, LEDS_MAX, LEDS_MIN },
-    { LEDS_MAX, LEDS_MIN, LEDS_MAX },
+ //   { LEDS_MAX, LEDS_MIN, LEDS_MAX },
     { LEDS_MAX, LEDS_MIN, LEDS_MIN }
 };
 
