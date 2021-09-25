@@ -3,7 +3,7 @@
 # Makefile (LowLevel2)                                                        #
 # ====================                                                        #
 #                                                                             #
-# Version: 1.0.3                                                              #
+# Version: 1.0.4                                                              #
 # Date   : 25.09.21                                                           #
 # Author : Peter Weissig                                                      #
 #                                                                             #
@@ -17,7 +17,7 @@
 CURRENTDIR = $(notdir $(patsubst %/,%, \
   $(dir $(abspath $(lastword $(MAKEFILE_LIST))))))
 
-SUBDIRS = $(patsubst %/.,%,$(wildcard */.))
+SUBDIRS = $(filter-out common modules,$(patsubst %/.,%,$(wildcard */.)))
 
 ###############################################################################
 # define phony targets for make commands
