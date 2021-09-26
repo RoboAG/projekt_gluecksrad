@@ -469,6 +469,8 @@ void animate (void)
 
         case STATE_MENU_STARTING:
         {
+            // fade current leds into menu leds
+            // (limit max. brightness to 50%)
             struct sLed led_color, menu_color;
 
             uint8_t
@@ -499,6 +501,8 @@ void animate (void)
 
         case STATE_MENU:
         {
+            // set current menu to 100% brightness
+            // set other menus  to  10% brightness
             uint8_t i = LEDS_COUNT, led_menu, d;
             struct sLed menu_color;
 
@@ -515,6 +519,8 @@ void animate (void)
 
         case STATE_MENU_NEXT:
         {
+            // set current and next menu to 50% brightness
+            // set other menus           to 10% brightness
             uint8_t i = LEDS_COUNT, led_menu, d;
             struct sLed menu_color;
 
@@ -531,6 +537,8 @@ void animate (void)
 
         case STATE_MENU_SELECT:
         {
+            // fade somehow all menu leds into current menu leds
+
             struct sLed led_color, menu_color;
 
             uint8_t
@@ -557,6 +565,7 @@ void animate (void)
 
         case STATE_MENU_SELECTED:
         {
+            // blink with current menu-color
             struct sLed color = getMenuColor(menu);
             if (diff % 1000 < 500)
                 leds_setAll2(color);
@@ -605,6 +614,8 @@ void animate (void)
 */
         case STATE_PRICES_EMPTY:
         {
+            // continuously fade all leds on and off within 4 seconds
+            // (using sin-waves, not just linear ramps)
             uint8_t i = LEDS_COUNT;
 
             while (i--)
@@ -761,7 +772,6 @@ void handleBumperNotPressed (void)
                             prices[i] = prices_max[i];
                             price_sum += prices[i];
                         }
-
 
                         //reset eeprom
                         eeprom_setPrices();
