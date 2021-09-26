@@ -2,9 +2,9 @@
 * main.c                                                                       *
 * ======                                                                       *
 *                                                                              *
-* Version: 10.5.3                                                              *
-* Date   : 22.02.19                                                            *
-* Author : Alexander Feilke                                                    *
+* Version: 11.0.0                                                              *
+* Date   : 25.09.21                                                            *
+* Author : Alexander Feilke, Peter Weissig                                     *
 *                                                                              *
 * See also:                                                                    *
 *   https://github.com/RoboAG/projekt_gluecksrad                               *
@@ -83,7 +83,6 @@ const struct sLed menu_colors[MENU_COUNT] = {
     { LEDS_MIN, LEDS_MIN, LEDS_MAX },
     { LEDS_MIN, LEDS_MAX, LEDS_MIN },
     { LEDS_MAX, LEDS_MAX, LEDS_MIN },
- //   { LEDS_MAX, LEDS_MIN, LEDS_MAX },
     { LEDS_MAX, LEDS_MIN, LEDS_MIN }
 };
 
@@ -98,9 +97,6 @@ const struct sLed price_colors[PRICES_COUNT] = {
 
 
 //*********************************<Macros>*************************************
-#define ONCE(code) do { code } while (0)
-#define angle_rad(v) ((v) * 3.1415 / 180.0)
-
 #define eeprom_read_uint8 eeprom_read
 #define eeprom_write_uint8 eeprom_write
 
@@ -114,10 +110,7 @@ const struct sLed price_colors[PRICES_COUNT] = {
 
 
 //*********************************<Prototypes>*********************************
-
-float   mod_float              (float v, float m);
 float   abs_float              (float v);
-float   abs_int16              (int16_t v);
 
 uint8_t getLedPrice            (uint8_t i);
 
@@ -147,25 +140,12 @@ int     main                   (void);
 
 
 //*********************************<Math>***************************************
-float mod_float (float v, float m)
-{
-    return v - m * (int32_t)(v / m);
-}
-
 float abs_float (float v)
 {
     if (v > 0)
         return v;
     else
        return -v;
-}
-
-float abs_int16 (int16_t v)
-{
-    if (v > 0)
-        return v;
-    else
-        return -v;
 }
 
 
@@ -347,17 +327,6 @@ void gluecksrad_init (void)
     leds_clearAll();
     systick_init();
     random_init();
-
-    // Jasper/Peter: only testing!
-    // uint16_t _prices[PRICES_COUNT] = PRICES_MAX;
-    // prices[0] = _prices[0];
-    // prices[1] = _prices[1];
-    // prices[2] = _prices[2];
-    // prices[3] = _prices[3];
-    // prices[4] = _prices[4];
-    //
-    // price_sum = prices[0] + prices[1] + prices[2] + prices[3] + prices[4];
-    // setState(STATE_DEMO);
 
     setMode(eeprom_getMode());
 
