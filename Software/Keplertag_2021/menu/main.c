@@ -184,11 +184,13 @@ void updateTime (void)
 
 
 //*********************************[eeprom]*************************************
+//array of maximum number of prices
+int16_t prices_max[PRICES_COUNT] = PRICES_MAX;
 //array of current number of prices
-int16_t prices[PRICES_COUNT]     = PRICES_MAX;
+int16_t prices[PRICES_COUNT];
 
 //sum of available prices
-int16_t price_sum = 620;
+int16_t price_sum = 0;
 
 
 //use a specific key to check whether the eeprom
@@ -285,14 +287,13 @@ void setMode (uint8_t md)
         case MODE_DEFAULT:
         {
             //reset price array
-            uint16_t _prices[PRICES_COUNT] = PRICES_MAX;
-            prices[0] = _prices[0];
-            prices[1] = _prices[1];
-            prices[2] = _prices[2];
-            prices[3] = _prices[3];
-            prices[4] = _prices[4];
+            price_sum = 0;
+            for (uint8_t i = 0; i < PRICES_COUNT; i++)
+            {
+                prices[i] = prices_max[i];
+                price_sum += prices[i];
+            }
 
-            price_sum = prices[0] + prices[1] + prices[2] + prices[3] + prices[4];
             setState(STATE_DEMO);
         }
         break;
@@ -754,12 +755,13 @@ void handleBumperNotPressed (void)
                     case MENU_EEPROM_RESET:
                     {
                         //reset price array
-                        uint16_t _prices[PRICES_COUNT] = PRICES_MAX;
-                        prices[0] = _prices[0];
-                        prices[1] = _prices[1];
-                        prices[2] = _prices[2];
-                        prices[3] = _prices[3];
-                        prices[4] = _prices[4];
+                        price_sum = 0;
+                        for (uint8_t i = 0; i < PRICES_COUNT; i++)
+                        {
+                            prices[i] = prices_max[i];
+                            price_sum += prices[i];
+                        }
+
 
                         //reset eeprom
                         eeprom_setPrices();
