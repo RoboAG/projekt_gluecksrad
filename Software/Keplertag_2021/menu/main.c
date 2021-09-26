@@ -31,7 +31,7 @@
 
 //*********************************<Flags>**************************************
 #define MODE_DEFAULT           1
-#define MODE_LENZ              2
+#define MODE_COUNTDOWN         2
 
 #define STATE_STARTING         0
 #define STATE_DEMO             1
@@ -50,7 +50,7 @@
 
 #define MENU_EXIT              0
 #define MENU_MODE_DEFAULT      1
-#define MENU_MODE_LENZ         2
+#define MENU_MODE_COUNTDOWN    2
 //#define MENU_SHOW_PRICES       3
 #define MENU_EEPROM_RESET      3
 #define MENU_COUNT             4
@@ -68,15 +68,22 @@ uint8_t menu = MENU_EEPROM_RESET;
 
 //*********************************<Constants>**********************************
 #define VERSION 11
-#define EEPROM_KEY (0b1010011101100000 + VERSION)
+#define EEPROM_KEY (0xA760 + VERSION)
+
 #define PRICES_COUNT 5
-// Jasper/Peter: only testing!
 #define PRICES_MAX { 5, 4, 3, 2, 1 }
+
 #define ROT_VEL 80
 
-#define EEPROM_RESET_DELAY 5000
-#define MENU_START_DELAY   3000
-#define MENU_SELECT_DELAY  3000
+
+#define MENU_INIT_DELAY      1000
+
+#define MENU_START_MINDELAY  1000
+#define MENU_START_MAXDELAY  3000
+
+#define MENU_SELECT_DELAY    3000
+
+#define ANIMATE_PRICES_EMPTY_LOOP 4000
 
 
 const struct sLed menu_colors[MENU_COUNT] = {
@@ -166,19 +173,19 @@ uint8_t getLedPrice (uint8_t i)
 
 //*********************************[timer]**************************************
 // 32-bit timer in milliseconds -> overflow after: 49d 17h 2m 47s 296ms
-uint32_t time_cur = 0,  time_last = 0;
+uint32_t time_now = 0,  time_last = 0;
 
 void updateTime (void)
 {
-    time_last = time_cur;
-    time_cur = systick_get();
+    time_last = time_now;
+    time_now = systick_get();
 }
 
 
 
 //*********************************[eeprom]*************************************
-//array of maximum amounts of prices
-int16_t prices[PRICES_COUNT] = PRICES_MAX;
+//array of current number of prices
+int16_t prices[PRICES_COUNT]     = PRICES_MAX;
 
 //sum of available prices
 int16_t price_sum = 620;
@@ -204,7 +211,7 @@ void eeprom_save_key (void)
 //read and write prices
 void eeprom_getPrices (void)
 {
-    if (mode == MODE_LENZ)
+    if (mode == MODE_COUNTDOWN)
     {
         eeprom_adress_set(4);                      // 4
         prices[0] = (int16_t)eeprom_read_uint16(); // 6
@@ -219,7 +226,7 @@ void eeprom_getPrices (void)
 
 void eeprom_setPrices (void)
 {
-    if (mode == MODE_LENZ)
+    if (mode == MODE_COUNTDOWN)
     {
         eeprom_adress_set(4);                     // 4
         eeprom_write_uint16((uint16_t)prices[0]); // 6
@@ -257,7 +264,7 @@ uint32_t time_btnMode_start = 0;
 uint32_t time_btnBumper_start = 0;
 
 // time when animation started
-uint32_t time_anim_start;
+uint32_t time_state_start;
 
 // rotation target
 uint16_t rot_target_abs; // absolute target including rounds
@@ -267,7 +274,7 @@ uint8_t  rot_target;     // target led (0-20]
 float rot_acc, rot_time;
 
 
-//*********************************[setState]***********************************
+//*********************************[setMode]************************************
 void setMode (uint8_t md)
 {
     mode = md;
@@ -290,7 +297,7 @@ void setMode (uint8_t md)
         }
         break;
 
-        case MODE_LENZ:
+        case MODE_COUNTDOWN:
         {
             if (eeprom_validate())
             {
@@ -313,7 +320,7 @@ void setMode (uint8_t md)
 void setState (uint8_t st)
 {
     state = st;
-    time_anim_start = time_cur;
+    time_state_start = time_now;
 }
 
 
@@ -331,13 +338,12 @@ void gluecksrad_init (void)
     setMode(eeprom_getMode());
 
     // show current mode
-
-    if (mode == MODE_LENZ)
-        leds_setAll2(getMenuColor(MENU_MODE_LENZ));
+    if (mode == MODE_COUNTDOWN)
+        leds_setAll2(getMenuColor(MENU_MODE_COUNTDOWN));
     else // if (mode == MODE_DEFAULT)
         leds_setAll2(getMenuColor(MENU_MODE_DEFAULT));
 
-    systick_delay(1000);
+    systick_delay(MENU_INIT_DELAY);
 
     updateTime();
 }
@@ -348,7 +354,7 @@ void gluecksrad_init (void)
 
 void animate (void)
 {
-    uint32_t diff = time_cur - time_anim_start;
+    uint32_t diff = time_now - time_state_start;
 
     switch (state)
     {
@@ -386,7 +392,7 @@ void animate (void)
 
             if (diff >= rot_time || led >= rot_target_abs)
             {
-                if (mode == MODE_LENZ)
+                if (mode == MODE_COUNTDOWN)
                 {
                     prices[getLedPrice(rot_target)]--;
                     eeprom_setPrices();
@@ -465,7 +471,7 @@ void animate (void)
             struct sLed led_color, menu_color;
 
             uint8_t
-                f = 10 * diff / MENU_START_DELAY,
+                f = 10 * diff / MENU_START_MAXDELAY,
                 g = 10 - f,
                 i = LEDS_COUNT;
 
@@ -481,8 +487,8 @@ void animate (void)
                 );
             }
 
-            //wait MENU_START_DELAY milliseconds during btnMode pressed
-            if (time_cur - time_btnMode_start >= MENU_START_DELAY)
+            //wait MENU_START_MAXDELAY milliseconds during btnMode pressed
+            if (time_now - time_btnMode_start >= MENU_START_MAXDELAY)
             {
                 setState(STATE_MENU_NEXT);
                 menu = MENU_EEPROM_RESET;
@@ -543,7 +549,7 @@ void animate (void)
             }
 
             //wait MENU_SELECT_DELAY milliseconds during btnBumper pressed
-            if (time_cur - time_btnBumper_start >= MENU_SELECT_DELAY)
+            if (time_now - time_btnBumper_start >= MENU_SELECT_DELAY)
                 setState(STATE_MENU_SELECTED);
         }
         break;
@@ -603,7 +609,8 @@ void animate (void)
             while (i--)
             {
                 struct sLed color = getLedColor(i);
-                float f = sin(6.283 * diff / 4000.0) / 2.0 + 0.5;
+                float f = sin(6.283 * diff / (float) ANIMATE_PRICES_EMPTY_LOOP)
+                          / 2.0 + 0.5;
                 leds_set(i, color.r * f, color.g * f, color.b * f);
             }
         }
@@ -665,7 +672,7 @@ void handleBumperPressed (void)
             {
                 rot_target = getRotationTarget();
 
-                uint16_t rounds = 2 * (14 + getLedPrice(rot_target)) * (15 + (time_cur % 5)) / 39;
+                uint16_t rounds = 2 * (14 + getLedPrice(rot_target)) * (15 + (time_now % 5)) / 39;
                 rot_target_abs = rounds * 20 + rot_target;
                 rot_acc = - ROT_VEL * ROT_VEL / (float)(2 * (rot_target_abs) + 1);
                 rot_time = 1000.0 * abs_float(ROT_VEL / rot_acc);
@@ -680,7 +687,7 @@ void handleBumperPressed (void)
         case STATE_MENU:
         {
             setState(STATE_MENU_SELECT);
-            time_btnBumper_start = time_cur;
+            time_btnBumper_start = time_now;
         }
 	break;
 /*
@@ -712,8 +719,8 @@ void handleBumperNotPressed (void)
 
         case STATE_MENU_SELECTED:
         {
-            //break up after 3 seconds
-            if (time_cur - time_anim_start >= 3000)
+            //break up after MENU_SELECT_DELAY seconds
+            if (time_now - time_state_start >= MENU_SELECT_DELAY)
             {
                 switch (menu)
                 {
@@ -732,9 +739,9 @@ void handleBumperNotPressed (void)
                     }
                     break;
 
-                    case MENU_MODE_LENZ:
+                    case MENU_MODE_COUNTDOWN:
                     {
-                        setMode(MODE_LENZ);
+                        setMode(MODE_COUNTDOWN);
                     }
                     break;
 /*
@@ -785,11 +792,11 @@ void handleModePressed (void)
         {
             if (time_btnMode_start)
             {
-                if (time_cur - time_btnMode_start > 1000)
+                if (time_now - time_btnMode_start > MENU_START_MINDELAY)
                     setState(STATE_MENU_STARTING);
             }
             else
-                time_btnMode_start = time_cur;
+                time_btnMode_start = time_now;
         }
         break;
 
