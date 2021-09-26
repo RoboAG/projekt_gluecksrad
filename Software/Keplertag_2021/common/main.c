@@ -66,11 +66,11 @@ uint8_t menu  = MENU_EXIT;            // will be overriden during
 
 
 //*********************************<Constants>**********************************
-#define VERSION 11
+// #define VERSION        --> see wrapper files "wrapper.c"
 #define EEPROM_KEY (0xA760 + VERSION)
 
 #define PRICES_COUNT 5
-#define PRICES_MAX { 5, 4, 3, 2, 1 }
+// #define PRICES_MAX     --> see wrapper files "wrapper.c"
 
 #define ROT_VEL 80
 
