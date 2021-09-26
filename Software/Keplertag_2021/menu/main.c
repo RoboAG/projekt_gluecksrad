@@ -2,7 +2,7 @@
 * main.c                                                                       *
 * ======                                                                       *
 *                                                                              *
-* Version: 10.5.3                                                             *
+* Version: 10.5.3                                                              *
 * Date   : 22.02.19                                                            *
 * Author : Alexander Feilke                                                    *
 *                                                                              *
@@ -67,10 +67,11 @@ uint8_t menu = MENU_EEPROM_RESET;
 
 
 //*********************************<Constants>**********************************
-#define VERSION 10
+#define VERSION 11
 #define EEPROM_KEY (0b1010011101100000 + VERSION)
 #define PRICES_COUNT 5
-#define PRICES_MAX { 170, 70, 38, 11, 9 }
+// Jasper/Peter: only testing!
+#define PRICES_MAX { 5, 4, 3, 2, 1 }
 #define ROT_VEL 80
 
 #define EEPROM_RESET_DELAY 5000
@@ -346,6 +347,17 @@ void gluecksrad_init (void)
     leds_clearAll();
     systick_init();
     random_init();
+
+    // Jasper/Peter: only testing!
+    // uint16_t _prices[PRICES_COUNT] = PRICES_MAX;
+    // prices[0] = _prices[0];
+    // prices[1] = _prices[1];
+    // prices[2] = _prices[2];
+    // prices[3] = _prices[3];
+    // prices[4] = _prices[4];
+    //
+    // price_sum = prices[0] + prices[1] + prices[2] + prices[3] + prices[4];
+    // setState(STATE_DEMO);
 
     setMode(eeprom_getMode());
 
@@ -815,6 +827,7 @@ void handleModePressed (void)
         case STATE_MENU:
         {
             setState(STATE_MENU_NEXT);
+            systick_delay(50);
         }
         break;
 
