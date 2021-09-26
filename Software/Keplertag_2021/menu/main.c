@@ -101,6 +101,8 @@ const struct sLed price_colors[PRICES_COUNT] = {
     { LEDS_MAX, LEDS_MAX, LEDS_MIN }
 };
 
+//array of maximum number of prices
+const int16_t prices_max[PRICES_COUNT] = PRICES_MAX;
 
 
 //*********************************<Macros>*************************************
@@ -184,8 +186,6 @@ void updateTime (void)
 
 
 //*********************************[eeprom]*************************************
-//array of maximum number of prices
-int16_t prices_max[PRICES_COUNT] = PRICES_MAX;
 //array of current number of prices
 int16_t prices[PRICES_COUNT];
 
