@@ -10,11 +10,11 @@ Die gesamte Steuerung des Glücksrades erfolgt über zwei Knöpfe:
 Beim Einschalten des Glücksrades wird automatisch der letzte Modus und die gespeicherte (Rest-)Preisliste geladen.
 Anschließend wird der geladene Modus durch 1-sekündiges Aufleuchten aller LEDs dargestellt.
 
-| Farbe | Modus      | Folgestatus           |
-| ----- | ---------- | --------------------- |
-| grün  | Standard   | Demo-Animation        |
-| gelb  | Countdown  | Demo-Animation        |
-| rot   | Ladefehler | Preise-Leer-Animation |
+| Farbe | Modus      | Folgestatus                          |
+| ----- | ---------- | ------------------------------------ |
+| grün  | Standard   | Demo-Animation                       |
+| gelb  | Countdown  | Demo- oder Preise-Leer-Animation     |
+| rot   | Ladefehler | Demo-Animation (wechsel zu Standard) |
 
 <img src="../../Bilder/Diagramme/start.png"      width="400">
 
@@ -31,13 +31,25 @@ Es gibt insgesamt fünf verschiedene Preiskategorien mit unterschiedlicher Werti
 Die Wahrscheinlichkeiten einen Preis zu erhalten ist nur abhängig von der Anzahl der hinterlegten bzw. verbleibenden Preise.
 
 
-| Preis          | Anzahl der LEDs | Keplertag 2021 | Frühlingsfest 2019 | Frühlingsfest 2018 |
-| -------------- | --------------- | -------------- | ------------------ | ------------------ |
-| gold    (gelb) |  1 von 20 (5%)  |     5          |     9              |     5              |
-| silber  (weiß) |  1 von 20 (5%)  |    10          |    11              |    15              |
-| rubin   (rot)  |  4 von 20 (20%) |    50          |    38              |   150              |
-| smaragd (grün) |  4 von 20 (20%) |    50          |    70              |   150              |
-| saphir  (blau) | 10 von 20 (50%) |   125          |   170              |   300              |
+### Keplertag 2021
+Beim Keplertag sind nur vier der fünf möglichen Preiskategorien belegt.
+
+| Preis          | Anzahl der LEDs | Keplertag 2021 |
+| -------------- | --------------- | -------------- |
+| rubin   (rot)  |  2 von 20 (10%) |    36          |
+| saphir  (blau) |  4 von 20 (20%) |    75          |
+| silber  (weiß) |  7 von 20 (35%) |   150          |
+| gold    (gelb) |  7 von 20 (35%) |   150          |
+
+### Frühlingsfest 2018 & 2019
+
+| Preis          | Anzahl der LEDs | Frühlingsfest 2019 | Frühlingsfest 2018 |
+| -------------- | --------------- | ------------------ | ------------------ |
+| gold    (gelb) |  1 von 20 (5%)  |     9              |     5              |
+| silber  (weiß) |  1 von 20 (5%)  |    11              |    15              |
+| rubin   (rot)  |  4 von 20 (20%) |    38              |   150              |
+| smaragd (grün) |  4 von 20 (20%) |    70              |   150              |
+| saphir  (blau) | 10 von 20 (50%) |   170              |   300              |
 
 Beispielsweise war die initiale Wahrscheinlichkeit beim Frühlingsfest 2018 einen goldenen Preis zu gewinnen ca. 0.8%.
 
