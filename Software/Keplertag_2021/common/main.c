@@ -2,8 +2,8 @@
 * main.c                                                                       *
 * ======                                                                       *
 *                                                                              *
-* Version: 11.0.0                                                              *
-* Date   : 26.09.21                                                            *
+* Version: 11.0.1                                                              *
+* Date   : 04.10.2021                                                          *
 * Author : Alexander Feilke, Peter Weissig                                     *
 *                                                                              *
 * See also:                                                                    *
@@ -886,11 +886,13 @@ void animate (void)
             // (limit max. brightness to 50%)
             struct sLed led_color, menu_color;
 
-            uint8_t
-                f = 10 * diff / MENU_START_MAXDELAY,
-                g = 10 - f,
-                i = LEDS_COUNT;
+            uint8_t f, g, i;
+            f = 10 * diff / MENU_START_MAXDELAY;
+            if (f > 10) 
+                f = 10;
+            g = 10 - f;
 
+            i = LEDS_COUNT;
             while (i--)
             {
                 led_color = getLedColor(i);
