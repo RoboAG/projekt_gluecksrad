@@ -39,8 +39,8 @@ Beim Keplertag 2021 sind nur vier der fünf möglichen Preiskategorien belegt.
 | -------------- | --------------- | -------------- |
 | rubin   (rot)  |  2 von 20 (10%) |    36          |
 | saphir  (blau) |  4 von 20 (20%) |    75          |
-| silber  (weiß) |  7 von 20 (35%) |   150          |
-| gold    (gelb) |  7 von 20 (35%) |   150          |
+| silber  (weiß) |  7 von 20 (35%) |   750          |
+| gold    (gelb) |  7 von 20 (35%) |   750          |
 
 
 \newpage

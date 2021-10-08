@@ -2,7 +2,7 @@
 * wrapper.c                                                                    *
 * =========                                                                    *
 *                                                                              *
-* Version: 11.2.0                                                              *
+* Version: 11.2.1                                                              *
 * Date   : 08.10.2021                                                          *
 * Author : Peter Weissig, Alex Feilke                                          *
 *                                                                              *
@@ -22,7 +22,7 @@
 #define VERSION 11
 
 #define PRICES_COUNT 5
-#define PRICES_MAX { 75, 0, 36, 150, 150}
+#define PRICES_MAX { 75, 0, 36, 750, 750}
 
 const struct sLed price_colors[PRICES_COUNT] = {
     {        0,        0, LEDS_MAX }, // 1. blue
