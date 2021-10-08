@@ -69,7 +69,7 @@ uint8_t menu  = MENU_EXIT;            // will be overriden during
 // #define VERSION        --> see wrapper files "wrapper.c"
 #define EEPROM_KEY (0xA760 + VERSION)
 
-#define PRICES_COUNT 5
+// #define PRICES_COUNT 5 --> see wrapper files "wrapper.c"
 // #define PRICES_MAX     --> see wrapper files "wrapper.c"
 
 #define ROT_VEL 80
@@ -105,13 +105,7 @@ const struct sLed menu_colors[MENU_COUNT] = {
     { LEDS_MAX,        0,        0 }
 };
 
-const struct sLed price_colors[PRICES_COUNT] = {
-    {        0,        0, LEDS_MAX },
-    {        0, LEDS_MAX,        0 },
-    { LEDS_MAX,        0,        0 },
-    { LEDS_MAX, LEDS_MAX, LEDS_MAX },
-    { LEDS_MAX, LEDS_MAX,        0 }
-};
+// const ... price_colors[PRICES_COUNT] --> see wrapper files "wrapper.c"
 
 //array of maximum number of prices
 const int16_t prices_max[PRICES_COUNT] = PRICES_MAX;
@@ -137,7 +131,7 @@ float   abs_float              (float v);
 void    updateTime             (void);
 
 
-uint8_t getLedPrice            (uint8_t i);
+// uint8_t getLedPrice         (uint8_t i); --> see wrapper files "wrapper.c"
 void    prices_clear           (void);
 void    prices_set_default     (void);
 void    prices_update_sum      (void);
@@ -204,17 +198,7 @@ int16_t prices[PRICES_COUNT];
 int16_t price_sum = 0;
 
 
-uint8_t getLedPrice (uint8_t i)
-{
-    if (i        % 2 ==  1) return 0; // 1, 3, 5, ..., 19 (50%)
-    if ((i % 10) % 6 ==  0) return 1; // 0, 6, 10, 16     (20%)
-    if ((i % 10) % 4 ==  0) return 2; // 4, 8, 14, 18     (20%)
-    if (i            == 12) return 3; // 12               ( 5%)
-    if (i            ==  2) return 4; // 2                ( 5%)
-
-    return 0;
-}
-
+// uint8_t getLedPrice (uint8_t i) --> see wrapper files "wrapper.c"
 
 void prices_clear (void)
 {
@@ -888,7 +872,7 @@ void animate (void)
 
             uint8_t f, g, i;
             f = 10 * diff / MENU_START_MAXDELAY;
-            if (f > 10) 
+            if (f > 10)
                 f = 10;
             g = 10 - f;
 
