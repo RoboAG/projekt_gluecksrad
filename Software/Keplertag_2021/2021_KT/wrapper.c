@@ -2,7 +2,7 @@
 * wrapper.c                                                                    *
 * =========                                                                    *
 *                                                                              *
-* Version: 11.2.1                                                              *
+* Version: 11.2.2                                                              *
 * Date   : 08.10.2021                                                          *
 * Author : Peter Weissig, Alex Feilke                                          *
 *                                                                              *
@@ -43,34 +43,34 @@ uint8_t getLedPrice            (uint8_t i);
 uint8_t getLedPrice (uint8_t i)
 {
     // left side   #    #   right side
-    // white      15    16      yellow
-    // blue       14    17        blue
-    // yellow     13    18       white
-    // white      12    19      yellow
-    // red        11     0         red
-    // yellow     10     1       white
-    // white       9     2      yellow
-    // blue        8     3        blue
-    // yellow      7     4       white
-    // white       6     5      yellow
+    // white      19     0      yellow
+    // blue       18     1        blue
+    // yellow     17     2      white
+    // white      16     3      yellow
+    // red        15     4         red
+    // yellow     14     5       white
+    // white      13     6      yellow
+    // blue       12     7        blue
+    // yellow     11     8       white
+    // white      10     9      yellow
 
 
-    // blue  (id=0):  3,  8, 14, 17                (20%)
+    // blue  (id=0):  1,  7, 12, 18                (20%)
     // green (id=1):  -                            ( 0%)
-    // red   (id=2):  0, 11                        (10%)
-    // white (id=3):  6,  9,  12, 15, 18  &  1,  4 (35%)
-    // yellow(id=4):  7, 10,  13, 16, 19  &  2,  5 (35%)
+    // red   (id=2):  4, 15                        (10%)
+    // white (id=3):  2,  5,  8  &  10, 13, 16, 19 (35%)
+    // yellow(id=4):  0,  3,  6,  9  &  11, 14, 17 (35%)
 
-    if (i > 5) {
-        if (i        % 3 ==  0) return 3;
-        if (i        % 3 ==  1) return 4;
-        if (i            == 11) return 2;
-        return                         0;
+    if (i < 10) {
+        if (i % 3 ==  0) return 4;
+        if (i % 3 ==  2) return 3;
+        if (i     ==  4) return 2;
+        return                  0;
     } else {
-        if (i        % 3 ==  1) return 3;
-        if (i        % 3 ==  2) return 4;
-        if (i            ==  0) return 2;
-        return                         0;
+        if (i % 3 ==  1) return 3;
+        if (i % 3 ==  2) return 4;
+        if (i     == 15) return 2;
+        return                  0;
     }
 }
 
